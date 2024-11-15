@@ -157,6 +157,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Title Bar Example")
+        self.setGeometry(100, 100, 400, 800)
 
         # Создаем титул-бар и добавляем его
         self.title_bar = CustomTitleBar(self)
@@ -167,7 +168,7 @@ class MainWindow(QMainWindow):
         main_layout = QVBoxLayout()
         main_widget.setLayout(main_layout)
         self.setCentralWidget(main_widget)
-   def load_stylesheet(self, path):
+    def load_stylesheet(self, path):
         file = QFile(path)
         if file.open(QFile.OpenModeFlag.ReadOnly | QFile.OpenModeFlag.Text):
             stream = QTextStream(file)
