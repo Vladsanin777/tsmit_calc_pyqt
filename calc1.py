@@ -1,13 +1,17 @@
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QLabel, QPushButton, QHBoxLayout
 from PyQt6.QtCore import Qt, QPoint
+import os, subprocess
 
-class FramelessWindow(QMainWindow):
+class FramelessWindow(QWidget):
     def __init__(self):
         super().__init__()
         
 
-        self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.FramelessWindowHint)
+        # Убираем рамку, чтобы окно можно было перемещать по всей области
+        #self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
 
+        # Храним начальную позицию мыши при захвате
+        self._drag_pos = None
 
         # Убираем рамки окна
         #self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
@@ -17,15 +21,15 @@ class FramelessWindow(QMainWindow):
         # Настраиваем размеры окна
         self.resize(800, 600)
         self.setStyleSheet("background-color: lightblue;")
-
+        """
         # Центральный виджет
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
-
+        """
         # Основной макет
-        self.layout = QVBoxLayout(self.central_widget)
+        self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
-
+        
         # Титульная панель
         self.title_bar = self.create_title_bar()
         self.layout.addWidget(self.title_bar)
@@ -73,32 +77,6 @@ class FramelessWindow(QMainWindow):
 
         return title_bar
 
-    def eventFilter(self, obj, event):
-        """Обрабатывает события мыши для перетаскивания окна."""
-        if obj == self.title_bar:
-            #print(f"Event Type: {event.type()}")
-            if event.type() == event.Type.MouseButtonPress:
-                self.is_moving = True
-                self.start_position = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
-                print(self.start_position)
-                event.accept()
-                return True
-
-            elif event.type() == event.Type.MouseMove and self.is_moving:
-                print("Перед move():", window.pos())
-                self.move(event.globalPosition().toPoint() - self.start_position)
-                self.show()
-                print("После move():", window.pos())
-                print(event.globalPosition().toPoint() - self.start_position)
-                event.accept()
-                return True
-
-            elif event.type() == event.Type.MouseButtonRelease and event.button() == Qt.MouseButton.LeftButton:
-                self.is_moving = False
-                event.accept()
-                return True
-
-        return super().eventFilter(obj, event)
 
 if __name__ == "__main__":
     import sys
