@@ -2,6 +2,18 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QLa
 from PyQt6.QtCore import Qt, QPoint
 import os, subprocess
 
+class TitleMenuView(QMenu):
+    def __init__(self):
+        super().__init__()
+        self.addAction("Global\nHistori", self.global_histori)
+        self.addAction("Local\nHistori", self.local_histori)
+    def global_histori(self):
+
+class TitleMenuButtonView(QPushButton):
+    def __init__(self):
+        super().__init__("View")
+        self.setMenu(TitleMenuView())
+
 class TitleButton(QPushButton):
     def __init__(self, label, callback):
         super().__init__(label)
@@ -22,6 +34,7 @@ class TitleLayout(QHBoxLayout):
         self.setContentsMargins(0, 0, 0, 0)
         self.addWidget(TitleButton("EN", self.language))
         self.addWidget(TitleButton("Fon", self.change_fon))
+        self.addWidget(
     def language(self):
         pass
     def change_fon(self):
