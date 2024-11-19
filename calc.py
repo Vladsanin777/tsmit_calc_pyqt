@@ -275,15 +275,15 @@ class LogicCalculateBasic():
         text: str = line_edit_calc_basic.text()
         position_cursor: int = line_edit_calc_basic.cursorPosition()
         line_edit_calc_basic.setText(text[:position_cursor] + label + text[position_cursor:])
-        line_edit_calc_basic.setCursorPosition(position_cursor + len(label_button))
+        line_edit_calc_basic.setCursorPosition(position_cursor + len(label))
 
     def button_result(self):
         global add_general_histori, add_local_histori_basic, result_basic_calc, line_edit_calc_basic
         if (line_edit_text := "".join(line_edit_text_list := self.line_edit_text.split("="))) != "":
-            add_general_histori.addLayout(BoxHistoriElement(line_edit_text, str(result_basic_calc)))
+            add_global_histori.addLayout(BoxHistoriElement(line_edit_text, str(result_basic_calc)))
             add_local_histori_basic.addLayout(BoxHistoriElement(line_edit_text, str(result_basic_calc)))
         line_edit_calc_basic.setText(result_basic_calc)
-        line_edit_calc_basic.setCurcorPosition(len(result_basic_calc)-1)
+        line_edit_calc_basic.setCursorPosition(len(result_basic_calc)-1)
 
 
     def button__O(self) -> None:
@@ -299,11 +299,17 @@ class LogicCalculateBasic():
         set_for_result_basic_calc.setText(result_basic_calc)
 
 #Global and Local Histori
+class HistoriVBoxLayout(QVBoxLayout):
+    def __init__(self):
+        super().__init__()
+        self.setSpacing(0)
+        self.setContentsMargins(0, 0, 0, 0)
+
 class HistoriScroll(QScrollArea):
     _add_histori: QVBoxLayout
     def __init__(self):
         super().__init__()
-        self._add_histori = QVBoxLayout()
+        self._add_histori = HistoriVBoxLayout()
         self.setLayout(self._add_histori)
     def getAddHistori(self):
         return self._add_histori
@@ -321,6 +327,8 @@ class LabelHistori(QLabel):
     callback: str
     def __init__(self, label: str, css_name: str, *, custom_callback: str = None):
         super().__init__(label)
+        self.setSizePolicy(self.sizePolicy().Policy.Expanding, self.sizePolicy().Policy.Expanding)
+        self.setContentsMargins(0, 0, 0, 0)
         self.setObjectName(css_name)
         if custom_callback:
             self.callback = custom_callback
@@ -337,6 +345,8 @@ class LabelHistori(QLabel):
 class BoxHistoriElement(QHBoxLayout):
     def __init__(self, expression: str, result: str):
         super().__init__()
+        self.setSpacing(0)
+        self.setContentsMargins(0, 0, 0, 0)
         self.addWidget(LabelHistori(expression, "keybord"))
         self.addWidget(LabelHistori("=", "keybord", custom_callback = expression + "=" + result))
         self.addWidget(LabelHistori(result, "keybord"))
@@ -373,6 +383,7 @@ class ButtonDragAndDrop(ButtonDrag):
 class LineEditCalculateBasic(QLineEdit):
     def __init__(self):
         super().__init__()
+        self.setSizePolicy(self.sizePolicy().Policy.Expanding, self.sizePolicy().Policy.Expanding)
         self.setObjectName("keybord")
         self.textChanged.connect(self.on_entry_changed)
     def on_entry_changed(self, text_entry):
@@ -404,8 +415,9 @@ class BasicCalculateGridLayout(QGridLayout):
     def __init__(self):
         super().__init__()
         self.setSpacing(0)
+        self.setContentsMargins(0, 0, 0, 0)
         global local_histori_basic, add_local_histori_basic
-        self.addWidget(local_histori_basic := HistoriScroll(), 0, 0, 4, 5)
+        self.addWidget(local_histori_basic := HistoriScroll(), 0, 0, 3, 5)
         add_local_histori_basic = local_histori_basic.getAddHistori()
         self.button_for_calc_basic("_ALL", 4, 0)
         global line_edit_calc_basic
@@ -419,7 +431,10 @@ class BasicCalculateGridLayout(QGridLayout):
             ["0", ".", "%", "+", "_E"]
         ], self, 5)
         global set_for_result_basic_calc, result_basic_calc
-        self.addWidget(set_for_result_basic_calc := ButtonDrag(result_basic_calc), 9, 0, 1, 2) 
+        self.addWidget(set_for_result_basic_calc := ButtonDrag(result_basic_calc), 10, 0, 1, 2) 
+        self.button_for_calc_basic("_DO", 10, 2)
+        self.button_for_calc_basic("_POST", 10, 3)
+        self.button_for_calc_basic("=", 10, 4)
 
 
     def button_for_calc_basic(self, label: str, row: int, column: int) -> None:
@@ -576,6 +591,7 @@ class Application(QApplication):
             #keybord {
                 margin: 0px;
                 border: none;
+                font-size: 30px;
                 background: rgba(0, 0, 0, 0.3);
                 color: rgb(255, 255, 255);
             }
