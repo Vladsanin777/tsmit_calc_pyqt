@@ -11,6 +11,7 @@ from PyQt6.QtGui import (
     QLinearGradient, QDrag
 )
 import random, asyncio
+from math import *
 
 from decimal import Decimal
 
@@ -231,7 +232,8 @@ class CalculateMain:
                     expression_1[priority_brackets[1] + 1:]
                 )
             return await BaseCalc.removing_zeros(str(await self._tokenize(expression_1)))
-        except:
+        except Exception as e:
+            print(e)
             return "Error"
 
 
@@ -254,31 +256,21 @@ class LogicCalculateBasic():
 
         
     def button__DO(self):
-        global add_general_histori, add_local_histori_basic, result_basic_calc, line_edit_calc_basic
+        global add_global_histori, add_local_histori_basic, result_basic_calc, line_edit_calc_basic
         if (line_edit_text := "".join(line_edit_text_list := self.line_edit_text.split("_DO"))) != "":
-            add_general_histori.addLayout(BoxHistoriElement(line_edit_text, str(result_basic_calc)))
+            add_global_histori.addLayout(BoxHistoriElement(line_edit_text, str(result_basic_calc)))
             add_local_histori_basic.addLayout(BoxHistoriElement(line_edit_text, str(result_basic_calc)))
         line_edit_calc_basic.setText(line_edit_text_list[1])
 
     def button__POST(self):
-        global add_general_histori, add_local_histori_basic, result_basic_calc, line_edit_calc_basic
+        global add_global_histori, add_local_histori_basic, result_basic_calc, line_edit_calc_basic
         if (line_edit_text := "".join(line_edit_text_list := line_edit_calc_basic.text().split("_POST"))) != "":
-            add_general_histori.addLayout(BoxHiskoriElement(line_edit_text, str(result_basic_calc)))
+            add_global_histori.addLayout(BoxHiskoriElement(line_edit_text, str(result_basic_calc)))
             add_local_histori_basic.addLayout(BoxHistoriElement(line_edit_text, str(result_basic_calc)))
         line_edit_calc_basic.setText(line_edit_text_list[0])
 
-    @staticmethod
-    def inputing_line_edit(button: QPushButton) -> None:
-        print(button.text(), 56)
-        global line_edit_calc_basic
-        label: str = button.text()
-        text: str = line_edit_calc_basic.text()
-        position_cursor: int = line_edit_calc_basic.cursorPosition()
-        line_edit_calc_basic.setText(text[:position_cursor] + label + text[position_cursor:])
-        line_edit_calc_basic.setCursorPosition(position_cursor + len(label))
-
     def button_result(self):
-        global add_general_histori, add_local_histori_basic, result_basic_calc, line_edit_calc_basic
+        global add_global_histori, add_local_histori_basic, result_basic_calc, line_edit_calc_basic
         if (line_edit_text := "".join(line_edit_text_list := self.line_edit_text.split("="))) != "":
             add_global_histori.addLayout(BoxHistoriElement(line_edit_text, str(result_basic_calc)))
             add_local_histori_basic.addLayout(BoxHistoriElement(line_edit_text, str(result_basic_calc)))
@@ -295,8 +287,20 @@ class LogicCalculateBasic():
             
     def button_other(self) -> None:
         global set_for_result_basic_calc, result_basic_calc
-        result_basic_calc = asyncio.run(CalculateMain(self.entry_text).calc())
+        result_basic_calc = asyncio.run(CalculateMain(self.line_edit_text).calc())
+        print(result_basic_calc)
         set_for_result_basic_calc.setText(result_basic_calc)
+    
+    @staticmethod
+    def inputing_line_edit(button) -> None:
+        global line_edit_calc_basic
+        label: str = button.text()
+        text: str = line_edit_calc_basic.text()
+        position_cursor: int = line_edit_calc_basic.cursorPosition()
+        line_edit_calc_basic.setText(text[:position_cursor] + label + text[position_cursor:])
+        line_edit_calc_basic.setCursorPosition(position_cursor + len(label))
+
+
 
 #Global and Local Histori
 class HistoriVBoxLayout(QVBoxLayout):
@@ -327,6 +331,7 @@ class LabelHistori(QLabel):
     callback: str
     def __init__(self, label: str, css_name: str, *, custom_callback: str = None):
         super().__init__(label)
+        self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setSizePolicy(self.sizePolicy().Policy.Expanding, self.sizePolicy().Policy.Expanding)
         self.setContentsMargins(0, 0, 0, 0)
         self.setObjectName(css_name)
@@ -357,15 +362,28 @@ class ButtonDrag(QPushButton):
         super().__init__(label)
         self.setSizePolicy(self.sizePolicy().Policy.Expanding, self.sizePolicy().Policy.Expanding)
         self.setObjectName(css_name)
-        if not callback: callback = LogicCalculateBasic.inputing_line_edit
+        if not callback: 
+            callback = lambda: LogicCalculateBasic.inputing_line_edit(self)
         self.clicked.connect(callback)
 
+    
+
     def mousePressEvent(self, event):
-        drag = QDrag(self)
-        mime_data = QMimeData()
-        mime_data.setText(self.text())
-        drag.setMimeData(mime_data)
-        drag.exec(Qt.DropAction.MoveAction)
+        if event.button() == Qt.MouseButton.LeftButton:
+            self._start_pos = event.pos()  # Сохраняем начальную позицию
+        super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        if (event.buttons() & Qt.MouseButton.LeftButton) and \
+                (event.pos() - self._start_pos).manhattanLength() > QApplication.startDragDistance():
+            drag = QDrag(self)
+            mime_data = QMimeData()
+            mime_data.setText(self.text())
+            drag.setMimeData(mime_data)
+            drag.exec(Qt.DropAction.MoveAction)
+        else:
+            super().mouseMoveEvent(event)
+
 
 class ButtonDragAndDrop(ButtonDrag):
     def __init__(self, label, *, css_name = "keybord", callback = None):
@@ -459,14 +477,14 @@ class MainTabWidget(QTabWidget):
 
 # Title Bar
 class TitleButton(QPushButton):
-    def __init__(self, label, *, callback=None, menu=None):
+    def __init__(self, label, *, callback=None, menu=None, css_name = "title-menu-button"):
         super().__init__(label)
         self.setSizePolicy(self.sizePolicy().Policy.Expanding, self.sizePolicy().Policy.Expanding)
         if callback:
             self.clicked.connect(callback)
         if menu:
             self.setMenu(menu)
-        self.setObjectName("title-button")
+        self.setObjectName(css_name)
 
 class TitleWidgetAction(QWidgetAction):
     def __init__(self, parent, button):
@@ -476,6 +494,7 @@ class TitleWidgetAction(QWidgetAction):
 class TitleMenu(QMenu):
     def __init__(self, buttons):
         super().__init__()
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         for button in buttons:
             self.addAction(TitleWidgetAction(self, button))
 
@@ -507,7 +526,8 @@ class TitleLayout(QHBoxLayout):
         global_histori.setVisible(not global_histori.isVisible())
 
     def local_histori_basic_callback(self):
-        print("Local history basic button clicked")
+        global local_histori_basic
+        local_histori_basic.setVisible(not local_histori_basic.isVisible())
 
 class TitleBar(QWidget):
     def __init__(self):
@@ -557,12 +577,17 @@ class Application(QApplication):
     def __init__(self):
         super().__init__([])
         self.setStyleSheet("""
-            QPushButton#title-button {
+            QPushButton#title-button,
+            QPushButton#title-menu-button {
                 background-color: rgba(0, 0, 0, 0.3);
                 color: white;
                 border: none;
             }
-            QPushButton#title-button:hover {
+            QPushButton#title-menu-button {
+                padding: 5px 10px;
+            }
+            QPushButton#title-button:hover, 
+            QPushButton#title-menu-button:hover {
                 background-color: rgba(0, 0, 0, 0.6);
             }
             QScrollArea{
@@ -598,6 +623,11 @@ class Application(QApplication):
             #keybord:hover {
                 background: transparent;
                 color: rgb(0, 0, 0);
+            }
+            QMenu {
+                background-color: rgba(0, 255, 0, 0);  /* Полупрозрачный фон */
+                color: white;                            /* Цвет текста */
+                border: 1px solid white;                 /* Рамка */
             }
         """)
 
