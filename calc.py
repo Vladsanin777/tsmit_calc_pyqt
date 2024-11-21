@@ -417,6 +417,8 @@ class LineEditCalculateBasic(QLineEdit):
                 logic_calc_basic.button__O()
             elif "=" in text_entry:
                 logic_calc_basic.button_result()
+            elif "_RES" in text_entry:
+                logic_calc_basic.button_result()
             else:
                 logic_calc_basic.button_other()
 
@@ -425,38 +427,28 @@ class BuildingButtonInGridLayout():
         for row_labels_for_button in list_button:
             column: int = 0
             for one_button in row_labels_for_button:
-                grid.addWidget(ButtonDrag(one_button), row, column, 1, 1)
+                grid.addWidget(ButtonDragAndDrop(one_button), row, column, 1, 1)
                 column += 1
             row += 1
-#Basic calculate
-class BasicCalculateGridLayout(QGridLayout):
+
+class GridCalcBasicKeybord(QGridLayout):
+    def __init__(self, list_button: list[list[str]]):
+        super().__init__()
+
+        self.setContentsMargins(0, 0, 0, 0)
+        self.setSpacing(0)
+        BuildingButtonInGridLayout(list_button, self)
+
+class TabWidgetCalcBasic(QTabWidget):
     def __init__(self):
         super().__init__()
-        self.setSpacing(0)
-        self.setContentsMargins(0, 0, 0, 0)
-        global local_histori_basic, add_local_histori_basic
-        self.addWidget(local_histori_basic := HistoriScroll(), 0, 0, 3, 5)
-        add_local_histori_basic = local_histori_basic.getAddHistori()
-        self.button_for_calc_basic("_ALL", 4, 0)
-        global line_edit_calc_basic
-        self.addWidget(line_edit_calc_basic := LineEditCalculateBasic(), 4, 1, 1, 3)
-        self.button_for_calc_basic("_O", 4, 4)
-        BuildingButtonInGridLayout([
-            ["()", "(", ")", "mod", "_PI"], 
-            ["7", "8", "9", ":", "sqrt"], 
-            ["4", "5", "6", "*", "^"], 
-            ["1", "2", "3", "-", "!"], 
-            ["0", ".", "%", "+", "_E"]
-        ], self, 5)
-        global set_for_result_basic_calc, result_basic_calc
-        self.addWidget(set_for_result_basic_calc := ButtonDrag(result_basic_calc), 10, 0, 1, 2) 
-        self.button_for_calc_basic("_DO", 10, 2)
-        self.button_for_calc_basic("_POST", 10, 3)
-        self.button_for_calc_basic("=", 10, 4)
+        self.addTab(TabQWidget(GridCalcBasicKeybord([["1", "2", "3", "4", "5"], ["6", "7", "8", "9", "0"]])), "digits 10")
+        self.addTab(TabQWidget(GridCalcBasicKeybord([["A", "B", "C"], ["D", "E", "F"]])), "digits 16")
+        self.addTab(TabQWidget(GridCalcBasicKeybord([["+", "-", ":", "*", "^"], ["!", "sqrt", "ln", "log", "lg"]])), "operators")
+        self.addTab(TabQWidget(GridCalcBasicKeybord([["_E", "_PI"]])), "consts")
+        self.addTab(TabQWidget(GridCalcBasicKeybord([["round", "mod", "0x"], ["0b", "0t", ","]])), "other")
 
 
-    def button_for_calc_basic(self, label: str, row: int, column: int) -> None:
-        self.addWidget(ButtonDrag(label, css_name = "keybord"), row, column, 1, 1)
 
 #Main TabWidget
 class TabQWidget(QWidget):
@@ -468,7 +460,7 @@ class MainTabWidget(QTabWidget):
     def __init__(self):
         super().__init__()
         self.tabBar().setExpanding(True)
-        self.addTab(TabQWidget(BasicCalculateGridLayout()), "Basic")
+        self.addTab(TabQWidget(QGridLayout()), "Basic")
         self.addTab(TabQWidget(QGridLayout()), "Tab 2")
         self.addTab(TabQWidget(QGridLayout()), "Tab 3")
         self.addTab(TabQWidget(QGridLayout()), "Tab 4")
@@ -534,6 +526,35 @@ class TitleBar(QWidget):
         super().__init__()
         self.setFixedHeight(30)
         self.setLayout(TitleLayout())
+
+#Basic calculate
+class BasicCalculateGridLayout(QGridLayout):
+    def __init__(self):
+        super().__init__()
+        self.setSpacing(0)
+        self.setContentsMargins(0, 0, 0, 0)
+        global local_histori_basic, add_local_histori_basic
+        self.addWidget(local_histori_basic := HistoriScroll(), 0, 0, 3, 5)
+        add_local_histori_basic = local_histori_basic.getAddHistori()
+        self.button_for_calc_basic("_ALL", 4, 0)
+        global line_edit_calc_basic
+        self.addWidget(line_edit_calc_basic := LineEditCalculateBasic(), 4, 1, 1, 3)
+        self.button_for_calc_basic("_O", 4, 4)
+        BuildingButtonInGridLayout([
+            ["()", "(", ")", "mod", "_PI"], 
+            ["7", "8", "9", ":", "sqrt"], 
+            ["4", "5", "6", "*", "^"], 
+            ["1", "2", "3", "-", "!"], 
+            ["0", ".", "%", "+", "_E"]
+        ], self, 5)
+        global set_for_result_basic_calc, result_basic_calc
+        self.addWidget(set_for_result_basic_calc := ButtonDrag(result_basic_calc), 10, 0, 1, 2) 
+        self.button_for_calc_basic("_DO", 10, 2)
+        self.button_for_calc_basic("_POST", 10, 3)
+        self.button_for_calc_basic("=", 10, 4)
+
+    def button_for_calc_basic(self, label: str, row: int, column: int) -> None:
+        self.addWidget(ButtonDrag(label, css_name = "keybord"), row, column, 1, 1)
 # Main Content
 class MainLayout(QVBoxLayout):
     def __init__(self):
@@ -545,6 +566,8 @@ class MainLayout(QVBoxLayout):
         self.addWidget(global_histori := HistoriScroll())
         add_global_histori = global_histori.getAddHistori()
         self.addWidget(MainTabWidget())
+        self.addLayout(BasicCalculateGridLayout())
+        self.addWidget(TabWidgetCalcBasic())
         
 # Window
 class Window(QWidget):
