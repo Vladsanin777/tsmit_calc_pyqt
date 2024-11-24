@@ -6,7 +6,7 @@ from PyQt6.QtCore import (
 )
 from PyQt6.QtGui import (
     QColor, QPalette, 
-    QLinearGradient
+    QLinearGradient, QBrush
 )
 import random
 
@@ -91,10 +91,13 @@ class Application(QApplication):
             }
         """)
 
+        self.change_fon()
     def change_fon(self):
         self.setPalette(PaletteWindow())
+    def add_window(self):
+        setattr(self, "window_" + str(Data.count_window), Window())
 
 Data.app = Application()
-Data.app.window = Window()
-app.exec()
+Data.app.add_window()
+Data.app.exec()
 

@@ -1,6 +1,7 @@
-from PyQt6.QtWidget import (
+from PyQt6.QtWidgets import (
     QLabel, QHBoxLayout
 )
+from PyQt6.QtCore import Qt
 class LabelHistori(QLabel):
     callback: str
     def __init__(self, label: str, css_name: str, *, custom_callback: str = None):

@@ -20,10 +20,12 @@ class TitleMenu(QMenu):
             self.addAction(TitleWidgetAction(self, button))
 
 class TitleLayout(QHBoxLayout):
-    def __init__(self):
+    def __init__(self, window):
         super().__init__()
+        self.window = window
         self.setContentsMargins(0, 0, 0, 0)
         self.setSpacing(0)
+        self.addWidget(BaseButton("+ Add", callback = self.add_window))
         self.addWidget(BaseButton("EN", callback=self.language_callback))
         self.addWidget(BaseButton("Fon", callback=Data.app.change_fon))
         self.addWidget(BaseButton(
@@ -39,20 +41,21 @@ class TitleLayout(QHBoxLayout):
             ])
         ))
 
+    def add_window(self):
+        Data.count_window += 1
+        Data.app.add_window()
     def language_callback(self):
         print("Language button clicked")
 
     def global_histori_callback(self):
-        global global_hislori
-        global_histori.setVisible(not global_histori.isVisible())
+        self.window.global_histori.setVisible(not self.window.global_histori.isVisible())
 
     def local_histori_basic_callback(self):
-        global local_histori_basic
-        local_histori_basic.setVisible(not local_histori_basic.isVisible())
+        self.window.local_histori_basic.setVisible(not self.window.local_histori_basic.isVisible())
 
 class TitleBar(QWidget):
-    def __init__(self):
+    def __init__(self, Window):
         super().__init__()
         self.setFixedHeight(30)
-        self.setLayout(TitleLayout())
+        self.setLayout(TitleLayout(Window))
 

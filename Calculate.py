@@ -185,7 +185,7 @@ class Calculate:
             result_list = result_list[::-1]
         print(result_list, 34)
         return self._calculate_expression_list(result_list)
-
+    @staticmethod
     def removing_zeros(expression: str) -> str:
         if '.' in expression and not 'E' in expression:
             while expression[-1] == '0': expression = expression[:-1]
@@ -211,7 +211,7 @@ class Calculate:
                     self._tokenize(inner_expression) +
                     expression_1[priority_brackets[1] + 1:]
                 )
-            self.removing_zeros(str(self._tokenize(expression_1)))
+            return self.removing_zeros(str(self._tokenize(expression_1)))
         except Exception as e:
             print(e)
             return "Error"
