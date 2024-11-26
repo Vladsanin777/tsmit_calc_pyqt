@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import (
     QHBoxLayout, QWidget
 )
 from PyQt6.QtCore import Qt
-from Button import BaseButton
+from Button import ButtonBase
 from Data import Data
 # Title Bar
 
@@ -25,18 +25,18 @@ class TitleLayout(QHBoxLayout):
         self.window = window
         self.setContentsMargins(0, 0, 0, 0)
         self.setSpacing(0)
-        self.addWidget(BaseButton("+ Add", callback = self.add_window))
-        self.addWidget(BaseButton("EN", callback=self.language_callback))
-        self.addWidget(BaseButton("Fon", callback=Data.app.change_fon))
-        self.addWidget(BaseButton(
+        self.addWidget(ButtonBase("+ Add", callback = self.add_window))
+        self.addWidget(ButtonBase("EN", callback=self.language_callback))
+        self.addWidget(ButtonBase("Fon", callback=Data.app.change_fon))
+        self.addWidget(ButtonBase(
             "View",
             menu=TitleMenu([
-                BaseButton("Global History", callback=self.global_histori_callback),
-                BaseButton("Local History", menu=TitleMenu([
-                    BaseButton("Basic", callback=self.local_histori_basic_callback),
-                    BaseButton("Tab 2"),
-                    BaseButton("Tab 3"),
-                    BaseButton("Tab 4")
+                ButtonBase("Global History", callback=self.global_histori_callback),
+                ButtonBase("Local History", menu=TitleMenu([
+                    ButtonBase("Basic", callback=self.local_histori_basic_callback),
+                    ButtonBase("Tab 2"),
+                    ButtonBase("Tab 3"),
+                    ButtonBase("Tab 4")
                 ]))
             ])
         ))

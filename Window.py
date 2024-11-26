@@ -33,8 +33,9 @@ class Window(QWidget):
     global_histori: HistoriScroll
     add_local_histori_basic: HistoriVBox
     local_histori_basic: HistoriScroll
-    line_edit_calc_basic: QLineEdit
     set_for_result_basic_calc: QPushButton
+    line_edit: list[list[QLineEdit]] = list()
+    imputtin: list[int]
     result_basic_calc: str = "0"
     def __init__(self):
 

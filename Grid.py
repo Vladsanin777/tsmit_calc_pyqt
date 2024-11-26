@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QGridLayout
-from Button import ButtonDrag, ButtonDragAndDrop
+from Button import ButtonDrag, ButtonDragAndDrop, ButtonBase
 from CreateHistori import HistoriScroll
 from LineEdit import LineEdit
 
@@ -57,5 +57,30 @@ class GridBasicCalc(QGridLayout):
         window.local_histori_basic = HistoriScroll()
         window.add_local_histori_basic = window.local_histori_basic.getAddHistori()
         self.addWidget(window.local_histori_basic)
-        window.line_edit_calc_basic = LineEdit(window)
-        self.addWidget(window.line_edit_calc_basic)
+        window.line_edit.append(list())
+        window.line_edit[0].append(LineEdit(window))
+        window.line_edit[0][0].cursorEntered.connect(lambda: setattr(window, 'inputtin', [0, 0]))
+        self.addWidget(window.line_edit[0][0])
+
+class GridIntegralCalc(QGridLayout):
+    def __init__(self, window):
+        super().__init__()
+        self.setSpacing(0)
+        self.setContentsMargins(0, 0, 0, 0)
+        window.local_histori_integral = HistoriScroll()
+        window.add_local_histori_integral = window.local_histori_integral.getAddHistori()
+        self.addWidget(window.local_histori_integral, 0, 0, 1, 5)
+        window.line_edit.append(list())
+        self.addWidget(ButtonBase("a = "), 1, 0, 1, 1)
+        window.line_edit[1].append(LineEdit("a"))
+        window.line_edit[1][0].cursorEntered.connect(lambda: setattr(window, 'inputtin', [1, 0]))
+        self.addWidget(window.line_edit[1][0], 1, 1, 1, 1)
+        self.addWidget(ButtonBase("b = "), 1, 2, 1, 1)
+        window.line_edit[1].append(LineEdit(window))
+        window.line_edit[1][1].cursorEntered.connect(lambda: setattr(window, 'inputtin', [1, 1]))
+        self.addWidget(window.line_edit[1][1], 1, 3, 1, 2)
+        window.line_edit[1].append(LineEdit(window))
+        window.line_edit[1][2].cursorEntered.connect(lambda: setattr(window, 'inputtin', [1, 2]))
+        self.addWidget(window.line_edit[1][2], 2, 0, 1, 5)
+        
+

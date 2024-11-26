@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import (
     QWidget, QTabWidget, QGridLayout
 )
 from Grid import (
-    GridCalculateKeybord, GridBasicCalc
+    GridCalculateKeybord, GridBasicCalc, GridIntegralCalc
 )
 class TabQWidget(QWidget):
     def __init__(self, tab):
@@ -27,7 +27,7 @@ class MainTabWidget(QTabWidget):
         super().__init__()
         self.tabBar().setExpanding(True)
         self.addTab(TabQWidget(GridBasicCalc(window)), "Basic")
-        self.addTab(TabQWidget(QGridLayout()), "Tab 2")
+        self.addTab(TabQWidget(GridIntegralCalc(window)), "Integral")
         self.addTab(TabQWidget(QGridLayout()), "Tab 3")
         self.addTab(TabQWidget(QGridLayout()), "Tab 4")
 

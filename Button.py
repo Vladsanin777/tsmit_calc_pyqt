@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import (
 
 from PyQt6.QtCore import Qt, QMimeData
 from PyQt6.QtGui import QDrag
-class BaseButton(QPushButton):
+class ButtonBase(QPushButton):
     def __init__(self, label, *, callback=None, menu=None, css_name = "title-menu-button"):
         super().__init__(label)
         self.setSizePolicy(self.sizePolicy().Policy.Expanding, self.sizePolicy().Policy.Expanding)
@@ -13,7 +13,7 @@ class BaseButton(QPushButton):
         if menu:
             self.setMenu(menu)
         self.setObjectName(css_name)
-class ButtonDrag(BaseButton):
+class ButtonDrag(ButtonBase):
     def __init__(self, label: str, *, callback = None, menu = None, css_name = "keybord"):
         super().__init__(label, callback = callback, menu = menu, css_name = css_name)
 
