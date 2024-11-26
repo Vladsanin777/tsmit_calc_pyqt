@@ -41,12 +41,12 @@ class GridCalculateCommon(QGridLayout):
         ], self, 1)
         window.set_for_result_basic_calc = ButtonDrag(window.result_basic_calc)
         self.addWidget(window.set_for_result_basic_calc, 6, 0, 1, 2) 
-        self.button("", 6, 2)
-        self.button("", 6, 3)
+        self.button("", 6, 2, button = ButtonDragAndDrop)
+        self.button("", 6, 3, button = ButtonDragAndDrop)
         self.button("=", 6, 4)
 
-    def button(self, label: str, row: int, column: int) -> None:
-        self.addWidget(ButtonDrag(label, css_name = "keybord"), row, column, 1, 1)
+    def button(self, label: str, row: int, column: int, *, button = ButtonDrag) -> None:
+        self.addWidget(button(label, css_name = "keybord"), row, column, 1, 1)
 
 
 class GridBasicCalc(QGridLayout):
@@ -69,18 +69,22 @@ class GridIntegralCalc(QGridLayout):
         self.setContentsMargins(0, 0, 0, 0)
         window.local_histori_integral = HistoriScroll()
         window.add_local_histori_integral = window.local_histori_integral.getAddHistori()
-        self.addWidget(window.local_histori_integral, 0, 0, 1, 5)
+        self.addWidget(window.local_histori_integral, 0, 0, 1, 6)
         window.line_edit.append(list())
-        self.addWidget(ButtonBase("a = "), 1, 0, 1, 1)
+        self.addWidget(ButtonBase("a = ", css_name = "calculate"), 1, 0, 1, 1)
         window.line_edit[1].append(LineEdit("a"))
         window.line_edit[1][0].cursorEntered.connect(lambda: setattr(window, 'inputtin', [1, 0]))
         self.addWidget(window.line_edit[1][0], 1, 1, 1, 1)
-        self.addWidget(ButtonBase("b = "), 1, 2, 1, 1)
+        self.addWidget(ButtonBase("b = ", css_name = "calculate"), 1, 2, 1, 1)
         window.line_edit[1].append(LineEdit(window))
         window.line_edit[1][1].cursorEntered.connect(lambda: setattr(window, 'inputtin', [1, 1]))
-        self.addWidget(window.line_edit[1][1], 1, 3, 1, 2)
+        self.addWidget(window.line_edit[1][1], 1, 3, 1, 1)
+        self.addWidget(ButtonBase("EPS = ", css_name = "calculate"), 1, 4, 1, 1)
         window.line_edit[1].append(LineEdit(window))
         window.line_edit[1][2].cursorEntered.connect(lambda: setattr(window, 'inputtin', [1, 2]))
-        self.addWidget(window.line_edit[1][2], 2, 0, 1, 5)
+        self.addWidget(window.line_edit[1][2], 1, 5, 1, 1)
+        window.line_edit[1].append(LineEdit(window))
+        window.line_edit[1][3].cursorEntered.connect(lambda: setattr(window, 'inputtin', [1, 3]))
+        self.addWidget(window.line_edit[1][3], 2, 0, 1, 6)
         
 

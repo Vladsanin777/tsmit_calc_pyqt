@@ -34,7 +34,7 @@ class TitleLayout(QHBoxLayout):
                 ButtonBase("Global History", callback=self.global_histori_callback),
                 ButtonBase("Local History", menu=TitleMenu([
                     ButtonBase("Basic", callback=self.local_histori_basic_callback),
-                    ButtonBase("Tab 2"),
+                    ButtonBase("Integral", callback=self.local_histori_integral_callback),
                     ButtonBase("Tab 3"),
                     ButtonBase("Tab 4")
                 ]))
@@ -52,6 +52,8 @@ class TitleLayout(QHBoxLayout):
 
     def local_histori_basic_callback(self):
         self.window.local_histori_basic.setVisible(not self.window.local_histori_basic.isVisible())
+    def local_histori_integral_callback(self):
+        self.window.local_histori_integral.setVisible(not self.window.local_histori_integral.isVisible())
 
 class TitleBar(QWidget):
     def __init__(self, Window):

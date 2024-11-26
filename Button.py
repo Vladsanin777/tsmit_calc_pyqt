@@ -37,7 +37,7 @@ class ButtonDrag(ButtonBase):
 class ButtonDragAndDrop(ButtonDrag):
     def __init__(self, label, *, callback = None, menu = None, css_name = "keybord"):
         super().__init__(label, callback = callback, menu = menu, css_name = css_name)
-
+        self.setAcceptDrops(True)
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasText():

@@ -38,10 +38,14 @@ class Application(QApplication):
         super().__init__([])
         self.setStyleSheet("""
             QPushButton#title-button,
-            QPushButton#title-menu-button {
+            QPushButton#title-menu-button,
+            QPushButton#calculate {
                 background-color: rgba(0, 0, 0, 0.3);
                 color: white;
                 border: none;
+            }
+            QPushButton#calculate {
+                font-size: 30px;
             }
             QPushButton#title-menu-button {
                 padding: 5px 10px;
