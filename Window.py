@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import (
 )
 from Title import TitleBar
 from CreateHistori import (
-    HistoriScroll, HistoriVBox
+    HistoriScroll, HistoriWidget, HistoriVBox
 )
 from TabWindow import (
     MainTabWidget, TabWidgetKeybord
@@ -21,6 +21,7 @@ class MainLayout(QVBoxLayout):
         self.addWidget(TitleBar(window))
         window.global_histori = HistoriScroll()
         window.add_global_histori = window.global_histori.getAddHistori()
+        window.resize_global_histori = window.global_histori.getResizeHistori()
         self.addWidget(window.global_histori)
         self.addWidget(MainTabWidget(window))
         self.addLayout(GridCalculateCommon(window))
@@ -30,13 +31,15 @@ class MainLayout(QVBoxLayout):
 class Window(QWidget):
 
     add_global_hitori: HistoriVBox
+    resize_global_histori: HistoriWidget
     global_histori: HistoriScroll
-    add_local_histori_basic: HistoriVBox
-    local_histori_basic: HistoriScroll
-    set_for_result_basic_calc: QPushButton
+    set_for_result: QPushButton
+    add_local_histori: list[HistoriWidget] = list()
+    resize_local_histori: list[HistoriWidget] = list()
+    local_histori: list[HistoriScroll] = list()
     line_edit: list[list[QLineEdit]] = list()
-    imputtin: list[int]
-    result_basic_calc: str = "0"
+    inputtin: list[int] = [0, 0]
+    result: list[str] = ["0", "0"]
     def __init__(self):
 
 
@@ -46,4 +49,16 @@ class Window(QWidget):
         self.resize(400, 800)
         self.setObjectName("window")
         self.show()
+    def activateLocalHistori(self):
+        return self.local_histori[self.inputtin[0]]
+    def activateAddLocalHistori(self):
+        return self.add_local_histori[self.inputtin[0]]
+    def activateResizeLocalHistori(self):
+        return self.resize_local_histori[self.inputtin[0]]
+    def globalHistori(self):
+        return self.global_histori
+    def addGlobalHistori(self):
+        return self.add_global_histori
+    def resizeGlobalHistori(self):
+        return self.resize_global_histori
 

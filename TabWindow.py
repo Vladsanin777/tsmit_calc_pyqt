@@ -30,5 +30,3 @@ class MainTabWidget(QTabWidget):
         self.addTab(TabQWidget(GridIntegralCalc(window)), "Integral")
         self.addTab(TabQWidget(QGridLayout()), "Tab 3")
         self.addTab(TabQWidget(QGridLayout()), "Tab 4")
-
-

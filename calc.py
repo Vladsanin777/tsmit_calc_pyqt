@@ -45,7 +45,7 @@ class Application(QApplication):
                 border: none;
             }
             QPushButton#calculate {
-                font-size: 30px;
+                font-size: 20px;
             }
             QPushButton#title-menu-button {
                 padding: 5px 10px;
@@ -92,6 +92,26 @@ class Application(QApplication):
                 background-color: rgba(0, 255, 0, 0);  /* Полупрозрачный фон */
                 color: white;                            /* Цвет текста */
                 border: 1px solid white;                 /* Рамка */
+            }
+            QWidget#histori {
+                background-color: transparent;
+            }
+            QScrollBar:vertical {
+                background: rgba(0, 0, 0, 0.3);
+                width: 14px;
+                margin: 0px 0px 0px 0px;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                background: none;
+                height: 0px;
+                border: none;
+            }
+            QScrollBar::handle:vertical {
+                background-color: rgba(0, 0, 0, 0.6);
+                border-radius: 7px; /* Делаем ползунок скруглённым */
+            }
+            QScrollBar::handle:vertical:hover {
+                background-color: rgba(255, 255, 255, 0.3);
             }
         """)
 

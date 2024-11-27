@@ -51,9 +51,9 @@ class TitleLayout(QHBoxLayout):
         self.window.global_histori.setVisible(not self.window.global_histori.isVisible())
 
     def local_histori_basic_callback(self):
-        self.window.local_histori_basic.setVisible(not self.window.local_histori_basic.isVisible())
+        self.window.local_histori[0].setVisible(not self.window.local_histori[0].isVisible())
     def local_histori_integral_callback(self):
-        self.window.local_histori_integral.setVisible(not self.window.local_histori_integral.isVisible())
+        self.window.local_histori[1].setVisible(not self.window.local_histori[1].isVisible())
 
 class TitleBar(QWidget):
     def __init__(self, Window):
