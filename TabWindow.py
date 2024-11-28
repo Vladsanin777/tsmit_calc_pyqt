@@ -10,13 +10,13 @@ class TabQWidget(QWidget):
         self.setLayout(tab)
 
 class TabWidgetKeybord(QTabWidget):
-    def __init__(self):
+    def __init__(self, window):
         super().__init__()
-        self.addTab(TabQWidget(GridCalculateKeybord([["1", "2", "3", "4", "5"], ["6", "7", "8", "9", "0"]])), "digits 10")
-        self.addTab(TabQWidget(GridCalculateKeybord([["A", "B", "C"], ["D", "E", "F"]])), "digits 16")
-        self.addTab(TabQWidget(GridCalculateKeybord([["+", "-", ":", "*", "^"], ["!", "sqrt", "ln", "log", "lg"]])), "operators")
-        self.addTab(TabQWidget(GridCalculateKeybord([["_E", "_PI"]])), "consts")
-        self.addTab(TabQWidget(GridCalculateKeybord([["round", "mod", "0x"], ["0b", "0t", ","]])), "other")
+        self.addTab(TabQWidget(GridCalculateKeybord([["1", "2", "3", "4", "5"], ["6", "7", "8", "9", "0"]], window)), "digits 10")
+        self.addTab(TabQWidget(GridCalculateKeybord([["A", "B", "C"], ["D", "E", "F"]], window)), "digits 16")
+        self.addTab(TabQWidget(GridCalculateKeybord([["+", "-", ":", "*", "^"], ["!", "sqrt", "ln", "log", "lg"]], window)), "operators")
+        self.addTab(TabQWidget(GridCalculateKeybord([["_E", "_PI"]], window)), "consts")
+        self.addTab(TabQWidget(GridCalculateKeybord([["round", "mod", "0x"], ["0b", "0t", ","]], window)), "other")
 
 
 

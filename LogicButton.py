@@ -6,6 +6,7 @@ class LogicCalculate():
     def __init__(self, line_edit_text: str, window):
         self.line_edit_text = line_edit_text
         self.window = window
+        print(line_edit_text, window)
 
     def getLineEditAndResult(self) -> list:
         return (self.window.line_edit[self.window.inputtin[0]][self.window.inputtin[1]], 
@@ -14,11 +15,11 @@ class LogicCalculate():
 
     def button__ALL(self):
         if (line_edit_text := "".join(self.line_edit_text.split("_ALL"))) != "":
-            self.window.add_global_histori.addLayout(BoxHistoriElement(line_edit_text, str(self.window.result_basic_calc)))
-            self.window.add_local_histori_basic.addLayout(BoxHistoriElement(line_edit_text, str(self.window.result_basic_calc)))
+            self.window.add_global_histori.addLayout(BoxHistoriElement(line_edit_text, str(self.window.result[self.window.inputtin[0]])))
+            self.window.activateLocalHistori().setLayout(BoxHistoriElement(line_edit_text, str(self.window.result[self.window.inputtin[0]])))
             self.window.result_basic_calc = "0"
-            self.window.set_for_result_basic_calc.setText(self.window.result_basic_calc)
-        self.window.line_edit_calc_basic.setText("")
+            self.window.set_for_result.setText(self.window.result[self.window.inputtin[0]])
+        self.window.line_edit[self.window.inputtin[0]][self.window.inputtin[1]].setText("")
 
         
     def button__DO(self):
@@ -55,16 +56,17 @@ class LogicCalculate():
             self.window.line_edit_calc_basic.setText(self.line_edit_text[:element_position] + self.line_edit_text[element_position+3:])
             
     def button_other(self) -> None:
+        print(3)
         result = self.window.result[self.window.inputtin[0]] = Calculate(self.line_edit_text).calc()
         self.window.set_for_result.setText(result)
     
     @staticmethod
     def inputing_line_edit(button, window) -> None:
-        global line_edit_calc_basic
         label: str = button.text()
-        text: str = window.line_edit_calc_basic.text()
-        position_cursor: int = window.line_edit_calc_basic.cursorPosition()
-        window.line_edit_calc_basic.setText(text[:position_cursor] + label + text[position_cursor:])
-        window.line_edit_calc_basic.setCursorPosition(position_cursor + len(label))
+        line_edit = window.activateLineEdit()
+        text: str = line_edit.text()
+        position_cursor: int = line_edit.cursorPosition()
+        line_edit.setText(text[:position_cursor] + label + text[position_cursor:])
+        line_edit.setCursorPosition(position_cursor + len(label))
 
 

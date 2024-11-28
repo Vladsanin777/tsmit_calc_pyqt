@@ -1,21 +1,21 @@
 from PyQt6.QtWidgets import (
     QPushButton, QApplication
 )
-
+from functools import partial
 from PyQt6.QtCore import Qt, QMimeData
 from PyQt6.QtGui import QDrag
 class ButtonBase(QPushButton):
-    def __init__(self, label, *, callback=None, menu=None, css_name = "title-menu-button"):
+    def __init__(self, label, *, callback=None, menu=None, css_name = "title-menu-button", window = None):
         super().__init__(label)
         self.setSizePolicy(self.sizePolicy().Policy.Expanding, self.sizePolicy().Policy.Expanding)
         if callback:
-            self.clicked.connect(callback)
+            self.clicked.connect(partial(callback, self, window) if window else callback)
         if menu:
             self.setMenu(menu)
         self.setObjectName(css_name)
 class ButtonDrag(ButtonBase):
-    def __init__(self, label: str, *, callback = None, menu = None, css_name = "keybord"):
-        super().__init__(label, callback = callback, menu = menu, css_name = css_name)
+    def __init__(self, label: str, *, callback = None, menu = None, css_name = "keybord", window = None):
+        super().__init__(label, callback = callback, menu = menu, css_name = css_name, window = window)
 
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
@@ -35,8 +35,8 @@ class ButtonDrag(ButtonBase):
 
 
 class ButtonDragAndDrop(ButtonDrag):
-    def __init__(self, label, *, callback = None, menu = None, css_name = "keybord"):
-        super().__init__(label, callback = callback, menu = menu, css_name = css_name)
+    def __init__(self, label, *, callback = None, menu = None, css_name = "keybord", window = None):
+        super().__init__(label, callback = callback, menu = menu, css_name = css_name, window = window)
         self.setAcceptDrops(True)
 
     def dragEnterEvent(self, event):

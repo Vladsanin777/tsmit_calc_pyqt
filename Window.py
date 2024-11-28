@@ -25,7 +25,7 @@ class MainLayout(QVBoxLayout):
         self.addWidget(window.global_histori)
         self.addWidget(MainTabWidget(window))
         self.addLayout(GridCalculateCommon(window))
-        self.addWidget(TabWidgetKeybord())
+        self.addWidget(TabWidgetKeybord(window))
         
 # Window
 class Window(QWidget):
@@ -39,7 +39,7 @@ class Window(QWidget):
     local_histori: list[HistoriScroll] = list()
     line_edit: list[list[QLineEdit]] = list()
     inputtin: list[int] = [0, 0]
-    result: list[str] = ["0", "0"]
+    result: list[str] = [["0"], ["0", "0", "0", "0"]]
     def __init__(self):
 
 
@@ -61,4 +61,7 @@ class Window(QWidget):
         return self.add_global_histori
     def resizeGlobalHistori(self):
         return self.resize_global_histori
-
+    def activateLineEdit(self):
+        return self.line_edit[self.inputtin[0]][self.inputtin[1]]
+    def activateResult(self):
+        return self.window.result[self.window.inputtin[0]][self.window.inputtin[1]]
