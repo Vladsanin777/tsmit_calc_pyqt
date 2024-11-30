@@ -2,6 +2,8 @@ from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QLineEdit,
     QPushButton
 )
+from PyQt6.QtGui import QPainter, QLinearGradient, QColor, QBrush
+from PyQt6.QtCore import Qt
 from Title import TitleBar
 from CreateHistori import (
     HistoriScroll, HistoriWidget, HistoriVBox
@@ -12,6 +14,19 @@ from TabWindow import (
 from Grid import (
     GridCalculateKeybord, GridCalculateCommon
 )
+
+"""
+class GradientWindow(QLinearGradient):
+    def __init__(self):
+        super().__init__(0, 0, 1, 1)
+        self.setCoordinateMode(QLinearGradient.CoordinateMode.ObjectBoundingMode)
+        self.setColorAt(0.0, QColor("rgb(140, 0, 0)"))
+        self.setColorAt(0.5, QColor("black"))
+        self.setColorAt(1.0, QColor("rgb(0, 0, 140)"))
+"""
+
+
+
 # Main Content
 class MainLayout(QVBoxLayout):
     def __init__(self, window):
@@ -48,7 +63,23 @@ class Window(QWidget):
         self.setWindowTitle("Calculate")
         self.resize(400, 800)
         self.setObjectName("window")
+        #self.gradient = GradientWindow()
         self.show()
+    def paintEvent(self, event):
+        # Создаём градиент, который охватывает всю область окна
+        gradient = QLinearGradient(0, 0, self.width(), self.height())
+        gradient.setColorAt(0.0, QColor(60, 0, 0))  # Красный
+        gradient.setColorAt(0.4, QColor(0, 0, 0))    # Чёрный
+        gradient.setColorAt(0.6, QColor(0, 0, 0))    # Чёрный
+        gradient.setColorAt(1.0, QColor(0, 0, 60))  # Синий
+
+        # Создаём QPainter для рисования
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        # Применяем градиент как кисть и заполняем окно
+        brush = QBrush(gradient)
+        painter.fillRect(self.rect(), brush)
     def activateLocalHistori(self):
         return self.local_histori[self.inputtin[0]]
     def activateAddLocalHistori(self):

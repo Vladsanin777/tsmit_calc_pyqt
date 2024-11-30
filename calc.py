@@ -20,13 +20,10 @@ colors_background = ["#99FF18", "#FFF818", "#FFA918", "#FF6618", "#FF2018", "#FF
 class GradientWindow(QLinearGradient):
     def __init__(self):
         super().__init__(0, 0, 1, 1)
-        random_color_1 = random.choice(colors_background)
-        random_color_2 = random.choice(colors_background)
-        while random_color_1 == random_color_2:
-            random_color_2 = random.choice(colors_background)
         self.setCoordinateMode(QLinearGradient.CoordinateMode.ObjectBoundingMode)
-        self.setColorAt(0, QColor(random_color_1))
-        self.setColorAt(1, QColor(random_color_2))
+        self.setColorAt(0.0, QColor("rgb(140, 0, 0)"))
+        self.setColorAt(0.5, QColor("black"))
+        self.setColorAt(1.0, QColor("rgb(0, 0, 140)"))
 
 class PaletteWindow(QPalette):
     def __init__(self):
@@ -42,7 +39,7 @@ class Application(QApplication):
             QPushButton#calculate {
                 background-color: rgba(0, 0, 0, 0.3);
                 color: white;
-                border: none;
+                border: none; 
             }
             QPushButton#calculate {
                 font-size: 20px;
@@ -81,11 +78,8 @@ class Application(QApplication):
                 margin: 0px;
                 border: none;
                 font-size: 30px;
-                background: rgba(0, 0, 0, 0.3);
-                color: rgb(255, 255, 255);
             }
             #keybord:hover {
-                background: transparent;
                 color: rgb(0, 0, 0);
             }
             QMenu {
@@ -115,9 +109,9 @@ class Application(QApplication):
             }
         """)
 
-        self.change_fon()
+        #self.change_fon()
     def change_fon(self):
-        self.setPalette(PaletteWindow())
+        """self.setPalette(PaletteWindow())"""
     def add_window(self):
         setattr(self, "window_" + str(Data.count_window), Window())
 
