@@ -17,10 +17,19 @@ class Calculate:
     # Метод для поиска приоритетных скобок
     def _searching_for_priority_brackets(self, expression: str, number_of_bracket: int) -> list[int]:
         return [(number_last_open_brackets := self._find_nth_occurrence(expression, '(', number_of_bracket)), expression.find(')', number_last_open_brackets)]
+    def _add_minus(self, result, minus):
+        if minus: result = -result
+        return result
     def _float(self, number: str) -> Decimal:
+        minus: bool = False
+        if number[0] == '-':
+            number = number[1:]
+            minus = True
+        print(number, number[0], 34)
+        result: Decimal
         match number[:2] :
             case "0x":
-                return Decimal(float.fromhex(number))
+                result = Decimal(float.fromhex(number))
             case "0b":
                 number = number[2:]
                 # Разделяем целую и дробную части
@@ -33,7 +42,7 @@ class Calculate:
                 fractional_value = sum(int(bit) * 2**(-i) for i, bit in enumerate(fractional_part, start=1))
 
                 # Итоговое значение
-                return Decimal(integer_value) + Decimal(fractional_value)
+                result = Decimal(integer_value) + Decimal(fractional_value)
             case "0t":    
                 number = number[2:]
                 integer_part, fractional_part = (number.split('.') if '.' in number else (number, ''))
@@ -45,13 +54,31 @@ class Calculate:
                 fractional_value = sum(int(digit) * 8**(-i) for i, digit in enumerate(fractional_part, start=1))
 
                 # Итоговое значение
-                return Decimal(integer_value) + Decimal(fractional_value)
+                result = Decimal(integer_value) + Decimal(fractional_value)
             case _:
-                return Decimal(number)
-    
+                result = Decimal(number)
+        return self._add_minus(result, minus)
+    def _number_negative(self, number):
+        return number[1:] if number[0] == '-' else '-' + number
+    def _check_for_negative_numbers(self, tokens: list[str]) -> list[str]:
+        if tokens[0] == '-': 
+            tokens.pop(0)
+            tokens[0] = self._number_negative(tokens[0])
+        #print([index for index, value in enumerate(tokens) if value == "-"])
+        for index in reversed([index for index, value in enumerate(tokens) if value == "-"]):
+            if tokens[index-1] in "-/*+":
+                print(1)
+                tokens.pop(index)
+                tokens[index] = self._number_negative(tokens[index])
+        print(tokens, 1234)
+        return tokens
+        
+
     # Main method for calculate
     def _calculate_expression_base(self, tokens: list[str]) -> str:
         print(tokens, 73)
+        tokens = self._check_for_negative_numbers(tokens)
+        print(tokens)
         priority_operator_index = 0
         while len(tokens) != 1:
             if '^' in tokens:
@@ -99,6 +126,7 @@ class Calculate:
             tokens[0] = str(self._float(tokens[0]))
         print(tokens[0], 35) 
         return tokens[0]
+        
     # Calculate persent and factorial
     def _calculate_expression_list(self, tokens: list[str]) -> str:
         print(tokens)
