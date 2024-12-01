@@ -2,12 +2,14 @@ from PyQt6.QtWidgets import (
     QScrollArea, QWidget, QVBoxLayout
 )
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QPalette, QColor, QPainter
 
 class HistoriVBox(QVBoxLayout):
     def __init__(self):
         super().__init__()
         self.setSpacing(0)
         self.setContentsMargins(0, 0, 0, 0)
+        self.setObjectName("histori")
 
 class HistoriWidget(QWidget):
     _add_histori: HistoriVBox
@@ -27,12 +29,15 @@ class HistoriScroll(QScrollArea):
         super().__init__()
         # self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)  # Всегда отображать полосу прокрутки
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)  # Отключить горизонтальную прокрутку
+        self.setObjectName("histori")
         self.setWidgetResizable(True)  # Виджет содержимого будет автоматически подгоняться под ширину
-        self.setMinimumHeight(150)
+        self.setMinimumHeight(100)
         self._resize_histori = HistoriWidget()
         self.setWidget(self._resize_histori)
         self._add_histori = self._resize_histori.getAddHistori()
+
     def getResizeHistori(self):
         return self._resize_histori
     def getAddHistori(self):
         return self._add_histori
+    

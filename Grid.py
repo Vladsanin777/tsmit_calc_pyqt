@@ -34,7 +34,7 @@ class GridCalculateCommon(QGridLayout):
 
         self.button("_DO", 0, 1)
         self.button("_RES", 0, 2)
-        self.button("_POST", 0, 3)
+        self.button("_POS", 0, 3)
         self.button("_O", 0, 4)
         BuildingGridKeybord([
             ["()", "(", ")", "mod", "_PI"], 
@@ -77,20 +77,21 @@ class GridIntegralCalc(QGridLayout):
         window.resize_local_histori.append(window.local_histori[-1].getResizeHistori())
         self.addWidget(window.local_histori[-1], 0, 0, 1, 6)
         window.line_edit.append(list())
-        self.addWidget(ButtonBase("a = ", css_name = "calculate"), 1, 0, 1, 1)
+        self.addWidget(ButtonBase("EPS = ", css_name = "calculate"), 1, 0, 1, 2)
         window.line_edit[1].append(LineEdit(window))
         window.line_edit[1][0].cursorEntered.connect(lambda: setattr(window, 'inputtin', [1, 0]))
-        self.addWidget(window.line_edit[1][0], 1, 1, 1, 1)
-        self.addWidget(ButtonBase("b = ", css_name = "calculate"), 1, 2, 1, 1)
+        self.addWidget(window.line_edit[1][0], 1, 2, 1, 4)
+        self.addWidget(ButtonBase("a = ", css_name = "calculate"), 2, 0, 1, 1)
         window.line_edit[1].append(LineEdit(window))
         window.line_edit[1][1].cursorEntered.connect(lambda: setattr(window, 'inputtin', [1, 1]))
-        self.addWidget(window.line_edit[1][1], 1, 3, 1, 1)
-        self.addWidget(ButtonBase("EPS = ", css_name = "calculate"), 1, 4, 1, 1)
+        self.addWidget(window.line_edit[1][1], 2, 1, 1, 2)
+        self.addWidget(ButtonBase("b = ", css_name = "calculate"), 2, 3, 1, 1)
         window.line_edit[1].append(LineEdit(window))
         window.line_edit[1][2].cursorEntered.connect(lambda: setattr(window, 'inputtin', [1, 2]))
-        self.addWidget(window.line_edit[1][2], 1, 5, 1, 1)
+        self.addWidget(window.line_edit[1][2], 2, 4, 1, 2)
+
         window.line_edit[1].append(LineEdit(window))
         window.line_edit[1][3].cursorEntered.connect(lambda: setattr(window, 'inputtin', [1, 3]))
-        self.addWidget(window.line_edit[1][3], 2, 0, 1, 6)
+        self.addWidget(window.line_edit[1][3], 3, 0, 1, 6)
         
 

@@ -11,6 +11,9 @@ class LineEdit(QLineEdit):
         self.setSizePolicy(self.sizePolicy().Policy.Expanding, self.sizePolicy().Policy.Expanding)
         self.setObjectName("keybord")
         self.textChanged.connect(self.on_entry_changed)
+        font = self.font()
+        font.setPointSize(20)
+        self.setFont(font)
     def focusInEvent(self, event: QFocusEvent):
             if event.reason():
                 self.cursorEntered.emit()  # Эмитируем сигнал, когда фокус установлен
@@ -49,13 +52,10 @@ class LineEdit(QLineEdit):
         text_width = metrics.horizontalAdvance(text)
         text_height = metrics.height()
 
-        # Центрирование текста
-        x = (self.width() - text_width) / 2
-        y = (self.height() + text_height) / 2
 
         # Создаём путь текста
         path = QPainterPath()
-        path.addText(x, y - metrics.descent(), self.font(), text)
+        path.addText(0, (self.height() + metrics.height()) / 2 - metrics.descent(), self.font(), text)
 
         # Рисуем белую обводку
         pen = QPen(QColor("white"))

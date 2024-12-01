@@ -25,20 +25,20 @@ class TitleLayout(QHBoxLayout):
         self.window = window
         self.setContentsMargins(0, 0, 0, 0)
         self.setSpacing(0)
-        self.addWidget(ButtonBase("+ Add", callback = self.add_window))
-        self.addWidget(ButtonBase("EN", callback=self.language_callback))
-        self.addWidget(ButtonBase("Fon", callback=Data.app.change_fon))
+        self.addWidget(ButtonBase("+ Add", callback = self.add_window, font_size = 15))
+        self.addWidget(ButtonBase("EN", callback=self.language_callback, font_size = 15))
+        self.addWidget(ButtonBase("Fon", callback=Data.app.change_fon, font_size = 15))
         self.addWidget(ButtonBase(
             "View",
             menu=TitleMenu([
-                ButtonBase("Global History", callback=self.global_histori_callback),
+                ButtonBase("Global History", callback=self.global_histori_callback, font_size = 15),
                 ButtonBase("Local History", menu=TitleMenu([
-                    ButtonBase("Basic", callback=self.local_histori_basic_callback),
-                    ButtonBase("Integral", callback=self.local_histori_integral_callback),
-                    ButtonBase("Tab 3"),
-                    ButtonBase("Tab 4")
-                ]))
-            ])
+                    ButtonBase("Basic", callback=self.local_histori_basic_callback, font_size = 15),
+                    ButtonBase("Integral", callback=self.local_histori_integral_callback, font_size = 15),
+                    ButtonBase("Tab 3", font_size = 15),
+                    ButtonBase("Tab 4", font_size = 15)
+                ]), font_size = 15)
+            ]), font_size = 15
         ))
 
     def add_window(self):
