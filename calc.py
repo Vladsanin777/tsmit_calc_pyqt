@@ -41,6 +41,11 @@ class Application(QApplication):
                 border: none;
                 background: transparent;
             }
+            QTabBar QToolButton {
+                border: none;
+                background: rgba(0, 0, 0, 0.3);
+                color: white; 
+            }
         """)
         
     def change_fon(self):

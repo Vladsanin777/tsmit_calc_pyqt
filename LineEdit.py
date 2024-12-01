@@ -14,6 +14,8 @@ class LineEdit(QLineEdit):
         font = self.font()
         font.setPointSize(20)
         self.setFont(font)
+        self.setMaximumHeight(30)
+        self.setContentsMargins(0, 0, 0, 0)
     def focusInEvent(self, event: QFocusEvent):
             if event.reason():
                 self.cursorEntered.emit()  # Эмитируем сигнал, когда фокус установлен

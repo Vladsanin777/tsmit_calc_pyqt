@@ -30,7 +30,7 @@ class StyleButton(QPainter):
         # Создаём путь текста
         path = QPainterPath()
         path.addText(
-            (parent.width() - metrics.horizontalAdvance(parent.text())) / 2, 
+            (parent.width() - metrics.horizontalAdvance(parent.text())) / 3, 
             (parent.height() + metrics.height()) / 2 - metrics.descent(), 
             parent.font(), 
             parent.text()

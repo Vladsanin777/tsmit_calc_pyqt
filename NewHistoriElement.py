@@ -12,6 +12,9 @@ class LabelHistori(QLabel):
         self.setSizePolicy(self.sizePolicy().Policy.Expanding, self.sizePolicy().Policy.Expanding)
         self.setContentsMargins(0, 0, 0, 0)
         self.setObjectName(css_name)
+        font = self.font()
+        font.setPointSize(20)
+        self.setFont(font)
         if custom_callback:
             self.callback = custom_callback
         else:

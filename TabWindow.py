@@ -25,6 +25,9 @@ class CustomTabBar(QTabBar):
             CustomLinearGradient()  # Градиент для четвертой вкладки
         ]
         
+        font = self.font()
+        font.setPointSize(20)
+        self.setFont(font)
 
     def paintEvent(self, event):
         painter = QPainter(self)
