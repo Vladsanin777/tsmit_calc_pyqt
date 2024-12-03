@@ -6,29 +6,23 @@ from PyQt6.QtCore import Qt
 from Grid import (
     GridCalculateKeybord, GridBasicCalc, GridIntegralCalc
 )
+from UI import CreateGradient
 
-class CustomLinearGradient(QLinearGradient):
-    def __init__(self):
-        super().__init__(0, 0, 400, 0)
-        self.setColorAt(0, Qt.GlobalColor.red)
-        self.setColorAt(1, Qt.GlobalColor.blue)
 
 
 class CustomTabBar(QTabBar):
-    def __init__(self):
+    def __init__(self, tab_widget, window):
         super().__init__()
-        # Задаем уникальные градиенты для каждой вкладки
-        self.gradients = [
-            CustomLinearGradient(),  # Градиент для первой вкладки
-            CustomLinearGradient(),  # Градиент для второй вкладки
-            CustomLinearGradient(),  # Градиент для третьей вкладки
-            CustomLinearGradient()  # Градиент для четвертой вкладки
-        ]
-        
+        self.tab_widget = tab_widget
+        self.window = window
+        self.gradients = []
         font = self.font()
         font.setPointSize(20)
         self.setFont(font)
 
+    def set_style(self):
+        # Задаем уникальные градиенты для каждой вкладки
+        self.gradients = [CreateGradient(self.tab_widget, self.window, is_tab=True) for _ in range(4)]
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
@@ -39,8 +33,6 @@ class CustomTabBar(QTabBar):
 
             # Установка шрифта
             font = self.font()
-            if is_selected:
-                font.setBold(True)  # Жирный шрифт для выделенной вкладки
             painter.setFont(font)
 
             # Получение текста вкладки
@@ -57,22 +49,28 @@ class CustomTabBar(QTabBar):
             path = QPainterPath()
             path.addText(x, y, font, text)
 
-            # Рисуем белую обводку текста
-            pen = QPen(QColor("white"))
-            pen.setWidth(2)
+            # Рисуем текст разным цветом для активной вкладки
+            pen = QPen()
+            pen.setColor(QColor("white"))  # Цвет текста неактивной вкладки
+            if is_selected:
+                pen.setWidth(4)
+            else:
+                pen.setWidth(2)
             painter.setPen(pen)
             painter.setBrush(Qt.BrushStyle.NoBrush)
             painter.drawPath(path)
 
-            # Установка градиента
-            gradient = self.gradients[index % len(self.gradients)]
-
-            # Рисуем текст с индивидуальным градиентом
-            painter.setBrush(QBrush(gradient))
-            painter.setPen(Qt.PenStyle.NoPen)
-            painter.drawPath(path)
+            # Установка градиента для вкладки
+            if self.gradients:
+                gradient = self.gradients[index % len(self.gradients)]
+                painter.setBrush(QBrush(gradient))
+                painter.setPen(Qt.PenStyle.NoPen)
+                painter.drawPath(path)
 
         painter.end()
+
+
+
 class TabQWidget(QWidget):
     def __init__(self, tab):
         super().__init__()
@@ -80,15 +78,18 @@ class TabQWidget(QWidget):
 
 class TabWidgetKeybord(QTabWidget):
     def __init__(self, window):
+        self.window = window
         super().__init__()
-        self.tabBar().setExpanding(True)
-        self.setTabBar(CustomTabBar())  # Устанавливаем кастомный TabBar
+        #self.tabBar().setExpanding(True)
+        self.tab_bar = CustomTabBar(self, window)
+        self.setTabBar(self.tab_bar)  # Устанавливаем кастомный TabBar
         self.addTab(TabQWidget(GridCalculateKeybord([["1", "2", "3", "4", "5"], ["6", "7", "8", "9", "0"]], window)), "digits 10")
         self.addTab(TabQWidget(GridCalculateKeybord([["A", "B", "C"], ["D", "E", "F"]], window)), "digits 16")
         self.addTab(TabQWidget(GridCalculateKeybord([["+", "-", ":", "*", "^"], ["!", "sqrt", "ln", "log", "lg"]], window)), "operators")
         self.addTab(TabQWidget(GridCalculateKeybord([["_E", "_PI"]], window)), "consts")
         self.addTab(TabQWidget(GridCalculateKeybord([["round", "mod", "0x"], ["0b", "0t", ","]], window)), "other")
-
+    def paintEvent(self, event):
+        self.tab_bar.set_style()
 
 
 
@@ -97,11 +98,20 @@ class TabWidgetKeybord(QTabWidget):
 class MainTabWidget(QTabWidget):
     def __init__(self, window):
         super().__init__()
-        self.tabBar().setExpanding(True)
-        self.setTabBar(CustomTabBar())  # Устанавливаем кастомный TabBar
+        #self.tabBar().setExpanding(True)
+        self.tab_bar = CustomTabBar(self, window)
+        self.setTabBar(self.tab_bar)  # Устанавливаем кастомный TabBar
         self.addTab(TabQWidget(GridBasicCalc(window)), "Basic")
         self.addTab(TabQWidget(GridIntegralCalc(window)), "Integral")
         self.addTab(TabQWidget(QGridLayout()), "Tab 3")
         self.addTab(TabQWidget(QGridLayout()), "Tab 4")
-    
-    
+        self.window = window
+
+    def paintEvent(self, event):
+        self.tab_bar.set_style()
+    """
+    def set_style(self):
+        print(3)
+        self.setTabBar(CustomTabBar(self, self.window))  # Устанавливаем кастомный TabBar
+        self.tabBar().show()
+   """ 

@@ -41,17 +41,37 @@ class Application(QApplication):
                 border: none;
                 background: transparent;
             }
+            
             QTabBar QToolButton {
                 border: none;
                 background: rgba(0, 0, 0, 0.3);
                 color: white; 
             }
+            QTabWidget {
+                background: transparent;
+                border: none;
+                margin: 0px;
+            }
+            QTabBar::tab {
+                background: transparent;
+                border: none;
+                padding: 0px auto;
+                margin: 0px;
+                color: trnsparent;
+            }
+            QTabBar {
+                background: transparent;
+                border: none;
+                margin: 0px;
+            }
+            
         """)
         
     def change_fon(self):
         """self.setPalette(PaletteWindow())"""
     def add_window(self):
-        setattr(self, "window_" + str(Data.count_window), Window())
+            window = Window()
+            setattr(self, "window_" + str(Data.count_window), window)
 
 Data.app = Application()
 Data.app.add_window()

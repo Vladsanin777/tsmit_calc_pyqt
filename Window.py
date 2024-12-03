@@ -38,9 +38,12 @@ class MainLayout(QVBoxLayout):
         window.add_global_histori = window.global_histori.getAddHistori()
         window.resize_global_histori = window.global_histori.getResizeHistori()
         self.addWidget(window.global_histori)
-        self.addWidget(MainTabWidget(window))
+        window.main_tab_widget = MainTabWidget(window)
+        self.addWidget(window.main_tab_widget)
+        print(4)
         self.addLayout(GridCalculateCommon(window))
-        self.addWidget(TabWidgetKeybord(window))
+        window.tab_widget_keybord = TabWidgetKeybord(window)
+        self.addWidget(window.tab_widget_keybord)
         
 # Window
 class Window(QWidget):
@@ -95,3 +98,7 @@ class Window(QWidget):
         return self.line_edit[self.inputtin[0]][self.inputtin[1]]
     def activateResult(self):
         return self.window.result[self.window.inputtin[0]][self.window.inputtin[1]]
+    def set_style_tab_widget(self):
+
+        self.tab_widget_keybord.set_style()
+        self.main_tab_widget.set_style()

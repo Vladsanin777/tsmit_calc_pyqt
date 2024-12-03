@@ -3,6 +3,7 @@ from Button import ButtonDrag, ButtonDragAndDrop, ButtonBase
 from CreateHistori import HistoriScroll
 from LineEdit import LineEdit
 from LogicButton import LogicCalculate
+from UI import CreateGradient
 
 class BuildingGridKeybord():
     def __init__(self, list_button: list[list[str]], grid: QGridLayout, window, row: int = 0):
@@ -43,7 +44,7 @@ class GridCalculateCommon(QGridLayout):
             ["1", "2", "3", "-", "!"], 
             ["0", ".", "%", "+", "_E"]
         ], self, window, 1)
-        window.set_for_result = ButtonDrag(window.result[0][0])
+        window.set_for_result = ButtonDrag(window.result[0][0], window = window)
         self.addWidget(window.set_for_result, 6, 0, 1, 2) 
         self.button("", 6, 2, button = ButtonDragAndDrop)
         self.button("", 6, 3, button = ButtonDragAndDrop)
@@ -85,12 +86,12 @@ class GridIntegralCalc(QGridLayout):
         window.line_edit.append(list())
         window.line_edit[1].append(LineEdit(window))
         window.line_edit[1][0].cursorEntered.connect(lambda: setattr(window, 'inputtin', [1, 0]))
-        self.addLayout(EpsIntegral(ButtonBase("EPS = ", css_name = "calculate", min_width = 92, max_width = 90), window.line_edit[1][0]), 1, 0, 1, 6)
-        self.addWidget(ButtonBase("a = ", css_name = "calculate", max_width = 45), 2, 0, 1, 1)
+        self.addLayout(EpsIntegral(ButtonBase("EPS = ", css_name = "calculate", min_width = 92, max_width = 90, window = window), window.line_edit[1][0]), 1, 0, 1, 6)
+        self.addWidget(ButtonBase("a = ", css_name = "calculate", max_width = 45, window = window), 2, 0, 1, 1)
         window.line_edit[1].append(LineEdit(window))
         window.line_edit[1][1].cursorEntered.connect(lambda: setattr(window, 'inputtin', [1, 1]))
         self.addWidget(window.line_edit[1][1], 2, 1, 1, 2)
-        self.addWidget(ButtonBase("b = ", css_name = "calculate", max_width = 45), 2, 3, 1, 1)
+        self.addWidget(ButtonBase("b = ", css_name = "calculate", max_width = 45, window = window), 2, 3, 1, 1)
         window.line_edit[1].append(LineEdit(window))
         window.line_edit[1][2].cursorEntered.connect(lambda: setattr(window, 'inputtin', [1, 2]))
         self.addWidget(window.line_edit[1][2], 2, 4, 1, 2)
