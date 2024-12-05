@@ -10,11 +10,8 @@ class CreateGradient(QLinearGradient):
         x = position_widget.x() - position_window.x()
         width = window.width()
         height = window.height()
-        if is_tab:
-            print(x, y, x + width, y - height)
-            super().__init__(x, y, x + width, y - height)
-        else:
-            super().__init__(x, y, x - width, y - height)
+        #super().__init__(x, y, x + width, y - height)
+        super().__init__(x, y, width - x, y - height)
         for colorAt in list_gradient:
             self.setColorAt(colorAt[0], colorAt[1])
 
@@ -38,10 +35,16 @@ class StyleButton(QPainter):
 
         metrics = QFontMetrics(parent.font())
 
+        text_x: float
+
+        if metrics.horizontalAdvance(parent.text()) > parent.width():
+            text_x = 0.0
+        else:
+            text_x = (parent.width() - metrics.horizontalAdvance(parent.text())) / 2 
         # Создаём путь текста
         path = QPainterPath()
         path.addText(
-            (parent.width() - metrics.horizontalAdvance(parent.text())) / 3, 
+            text_x,
             (parent.height() + metrics.height()) / 2 - metrics.descent(), 
             parent.font(), 
             parent.text()

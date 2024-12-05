@@ -1,5 +1,12 @@
 from math import *
 from decimal import Decimal
+from re import sub
+
+
+class BracketsError(Exception):
+    ...
+class NotOperatorError(Exception):
+    ...
 
 class Calculate:
     expression: str
@@ -73,6 +80,24 @@ class Calculate:
         print(tokens, 1234)
         return tokens
         
+    def is_not_operator(self, number_or_operator):
+        match number_or_operator:
+            case "^" | "*" | "/" | "+" | "_" | "|" | ":":
+                return False
+        return True
+
+    def not_operator(self, tokens):
+        print(tokens, len(tokens), "len")
+        for index in range(len(tokens)-1):
+            if self.is_not_operator(tokens[index]) and self.is_not_operator(tokens[index+1]):
+                return index + 1
+        return 0
+    
+    def adding_multiplication(self, tokens):
+        while (index := self.not_operator(tokens)):
+            print(index, 102)
+            tokens.insert(index, "*")
+        return tokens
 
     # Main method for calculate
     def _calculate_expression_base(self, tokens: list[str]) -> str:
@@ -80,6 +105,9 @@ class Calculate:
         tokens = self._check_for_negative_numbers(tokens)
         print(tokens)
         priority_operator_index = 0
+        if len(tokens) > 1:
+            tokens = self.adding_multiplication(tokens)
+        print(tokens, 89)
         while len(tokens) != 1:
             if '^' in tokens:
                 priority_operator_index = tokens.index('^')
@@ -87,7 +115,7 @@ class Calculate:
                 tokens.pop(priority_operator_index)
                 a = self._float(tokens[priority_operator_index-1])
                 tokens[priority_operator_index-1] = str(a**b)
-            if '*' in tokens:
+            elif '*' in tokens:
                 priority_operator_index = tokens.index('*')
                 b = self._float(tokens.pop(priority_operator_index+1))
                 tokens.pop(priority_operator_index)
@@ -122,8 +150,11 @@ class Calculate:
                 tokens[0] = "".join([tokens[0], tokens[1], tokens[2] if len(tokens) == 3 else str(e)])
                 while len(tokens) > 1:
                     tokens.pop()
-        else:
-            tokens[0] = str(self._float(tokens[0]))
+            """
+            else:
+                raise NotOperatorError("_calculate_expression_base")
+            """
+        tokens[0] = str(self._float(tokens[0]))
         print(tokens[0], 35) 
         return tokens[0]
         
@@ -173,22 +204,38 @@ class Calculate:
             print(890)
 
         return self._calculate_expression_base(tokens)
-    def debuger(self):
-        self.expression = self.expression.replace("sqrt", "s")
-        self.expression = self.expression.replace("ln", "n")
-        self.expression = self.expression.replace("log", "l")
-        self.expression = self.expression.replace("lg", "g")
-        self.expression = self.expression.replace("**", "^")
-        replay: bool = True
-        while replay:
-            replay = False
-            match self.expression[-1]:
-                case "*" | "/" | ":" | "+" | "-" | "^" | "l" | "m" | "n" | "g" | "s":
-                    self.expression = self.expression[:-1]
-                    replay = True
+    class Debuger:
+        """
+        Класс для обработки математических выражений: очистка, замена операторов и проверка скобок.
+        """
+        def __init__(self, expression: str):
+            expression = expression.replace("sqrt", "s").replace("ln", "n").replace("log", "l").replace("lg", "g").replace("**", "^")
+            # Удаление символов в конце строки
+            expression = sub(r'[*/:+\-\^lmngs()]+$', '', expression)
+            self.expression = expression
+            # Добавление недостающих закрывающих скобок
+            self.expression += ")" * self.verification_brackets()
 
-        while self.expression.count("(") > self.expression.count(")"):
-            self.expression += ")"
+        def verification_brackets(self) -> int:
+            """
+            Проверяет баланс скобок в выражении. Возвращает количество недостающих закрывающих скобок.
+            Выбрасывает BracketsError, если баланс нарушен (лишние закрывающие скобки).
+            """
+            bracket = 0
+            for symbol in self.expression:
+                if symbol == "(":
+                    bracket += 1
+                elif symbol == ")":
+                    bracket -= 1
+                if bracket < 0:
+                    raise BracketsError("verification_brackets")
+            return bracket
+
+        def __str__(self) -> str:
+            """
+            Возвращает обработанное выражение.
+            """
+            return self.expression
     # Разбиение строки на отдельные элементы (числа и операторы)
     def _tokenize(self, expression: str) -> str:
         # sheach first digit
@@ -224,7 +271,7 @@ class Calculate:
     def calc(self) -> str:
         if not self.expression: return "0"
         try:
-            self.debuger()
+            self.expression = str(self.Debuger(self.expression))
             
             expression_1 = self.expression
             while (count_brackets := expression_1.count("(")) != 0:
