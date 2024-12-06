@@ -6,11 +6,11 @@ from LogicButton import LogicCalculate
 from UI import CreateGradient
 
 class BuildingGridKeybord():
-    def __init__(self, list_button: list[list[str]], grid: QGridLayout, window, row: int = 0):
+    def __init__(self, list_button: list[list[str]], grid: QGridLayout, window, row: int = 0, *, button = ButtonDrag):
         for row_labels_for_button in list_button:
             column: int = 0
             for one_button in row_labels_for_button:
-                grid.addWidget(ButtonDragAndDrop(one_button, callback = LogicCalculate.inputing_line_edit, window = window), row, column, 1, 1)
+                grid.addWidget(button(one_button, callback = LogicCalculate.inputing_line_edit, window = window), row, column, 1, 1)
                 column += 1
             row += 1
 
@@ -43,7 +43,7 @@ class GridCalculateCommon(QGridLayout):
             ["4", "5", "6", "*", "^"], 
             ["1", "2", "3", "-", "!"], 
             ["0", ".", "%", "+", "_E"]
-        ], self, window, 1)
+        ], self, window, 1, button = ButtonDragAndDrop)
         window.set_for_result = ButtonDrag(window.result[0][0], window = window)
         self.addWidget(window.set_for_result, 6, 0, 1, 2) 
         self.button("", 6, 2, button = ButtonDragAndDrop)

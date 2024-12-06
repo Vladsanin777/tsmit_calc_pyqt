@@ -8,18 +8,21 @@ class LogicCalculate():
         self.window = window
         print(line_edit_text, window)
 
-    def getLineEditAndResult(self) -> list:
-        return (self.window.line_edit[self.window.inputtin[0]][self.window.inputtin[1]], 
-            self.window.result[self.window.inputtin[0]]
-        )
 
     def button__ALL(self):
         if (line_edit_text := "".join(self.line_edit_text.split("_ALL"))) != "":
-            self.window.add_global_histori.addLayout(BoxHistoriElement(line_edit_text, str(self.window.result[self.window.inputtin[0]])))
-            self.window.activateLocalHistori().setLayout(BoxHistoriElement(line_edit_text, str(self.window.result[self.window.inputtin[0]])))
-            self.window.result_basic_calc = "0"
-            self.window.set_for_result.setText(self.window.result[self.window.inputtin[0]])
-        self.window.line_edit[self.window.inputtin[0]][self.window.inputtin[1]].setText("")
+            self.window.addGlobalHistori().addLayout(BoxHistoriElement(line_edit_text, self.window.activateResult()))
+            self.window.resizeGlobalHistori().adjustSize()
+            self.window.globalHistori().verticalScrollBar().setValue(self.window.global_histori.verticalScrollBar().maximum())
+
+            self.window.activateAddLocalHistori().addLayout(BoxHistoriElement(line_edit_text, self.window.activateResult()))
+
+            self.window.activateResizeLocalHistori().adjustSize()
+            scroll_histori = self.window.activateLocalHistori()
+            scroll_histori.verticalScrollBar().setValue(scroll_histori.verticalScrollBar().maximum())
+            self.window.activateSetResult("0")
+
+        self.window.activateLineEdit().setText("")
 
         
     def button__DO(self):
@@ -35,16 +38,16 @@ class LogicCalculate():
         self.window.line_edit_calc_basic.setText(line_edit_text_list[0])
 
     def button_result(self):
-
-        line_edit, result = self.getLineEditAndResult()
+        result = self.window.activateResult()
         if (line_edit_text := "".join(line_edit_text_list := self.line_edit_text.split("="))) != "":
-            self.window.add_global_histori.addLayout(BoxHistoriElement(line_edit_text, str(result)))
-            self.window.resize_global_histori.adjustSize()
-            self.window.global_histori.verticalScrollBar().setValue(self.window.global_histori.verticalScrollBar().maximum())
+            self.window.addGlobalHistori().addLayout(BoxHistoriElement(line_edit_text, str(result)))
+            self.window.resizeGlobalHistori().adjustSize()
+            self.window.globalHistori().verticalScrollBar().setValue(self.window.global_histori.verticalScrollBar().maximum())
             self.window.activateAddLocalHistori().addLayout(BoxHistoriElement(line_edit_text, str(result)))
             self.window.activateResizeLocalHistori().adjustSize()
             scroll_histori = self.window.activateLocalHistori()
             scroll_histori.verticalScrollBar().setValue(scroll_histori.verticalScrollBar().maximum())
+        line_edit = self.window.activateLineEdit()
         line_edit.setText(result)
         line_edit.setCursorPosition(len(result)-1)
 
@@ -57,7 +60,7 @@ class LogicCalculate():
             
     def button_other(self) -> None:
         print(3)
-        result = self.window.result[self.window.inputtin[0]] = Calculate(self.line_edit_text).calc()
+        self.window.activateSetResult(result := str(Calculate(self.line_edit_text)))
         self.window.set_for_result.setText(result)
     
     @staticmethod

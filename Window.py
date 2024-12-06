@@ -97,8 +97,7 @@ class Window(QWidget):
     def activateLineEdit(self):
         return self.line_edit[self.inputtin[0]][self.inputtin[1]]
     def activateResult(self):
-        return self.window.result[self.window.inputtin[0]][self.window.inputtin[1]]
-    def set_style_tab_widget(self):
-
-        self.tab_widget_keybord.set_style()
-        self.main_tab_widget.set_style()
+        return self.result[self.inputtin[0]][self.inputtin[1]]
+    def activateSetResult(self, new_result):
+        print(self.result)
+        self.result[self.inputtin[0]][self.inputtin[1]] = new_result

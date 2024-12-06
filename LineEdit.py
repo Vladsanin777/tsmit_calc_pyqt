@@ -3,6 +3,7 @@ from PyQt6.QtGui import QDrag, QPainter, QLinearGradient, QFont, QBrush, QTextOp
 from PyQt6.QtCore import pyqtSignal, Qt
 from PyQt6.QtGui import QFocusEvent
 from LogicButton import LogicCalculate
+from UI import StyleButton
 class LineEdit(QLineEdit):
     cursorEntered = pyqtSignal()
     def __init__(self, window):
@@ -39,41 +40,4 @@ class LineEdit(QLineEdit):
             else:
                 logic_calc.button_other()
     def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-
-        # Задаём фон (например, белый)
-        painter.fillRect(self.rect(), QColor("transparent"))
-
-        # Установка шрифта
-        painter.setFont(self.font())
-
-        # Подготовка текста
-        text = self.text if isinstance(self.text, str) else self.text()
-        metrics = QFontMetrics(self.font())
-        text_width = metrics.horizontalAdvance(text)
-        text_height = metrics.height()
-
-
-        # Создаём путь текста
-        path = QPainterPath()
-        path.addText(0, (self.height() + metrics.height()) / 2 - metrics.descent(), self.font(), text)
-
-        # Рисуем белую обводку
-        pen = QPen(QColor("white"))
-        pen.setWidth(2)  # Толщина обводки
-        painter.setPen(pen)
-        painter.setBrush(Qt.BrushStyle.NoBrush)  # Убираем заливку для обводки
-        painter.drawPath(path)
-
-        # Установка градиента
-        gradient = QLinearGradient(0, 0, self.width(), 0)
-        gradient.setColorAt(0, Qt.GlobalColor.red)
-        gradient.setColorAt(1, Qt.GlobalColor.blue)
-
-        # Рисуем текст с градиентом
-        painter.setBrush(QBrush(gradient))
-        painter.setPen(Qt.PenStyle.NoPen)  # Убираем обводку для текста
-        painter.drawPath(path)
-
-        painter.end()
+        StyleButton(self, self.window)
