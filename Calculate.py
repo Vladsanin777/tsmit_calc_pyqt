@@ -7,30 +7,32 @@ import traceback
 class Calculate:
     result: str
     def __init__(self, expression):
-        if not expression: self.result = "0"
-        try:
-            expression = str(self.Debuger(expression))
-            while (count_brackets := expression.count("(")) != 0:
-                print("1")
-                priority_brackets = self._searching_for_priority_brackets(
-                    expression, 
-                    count_brackets
-                )
-                inner_expression = expression[priority_brackets[0] + 1:priority_brackets[1]]
-                print(4)
-                add_multiplication = lambda symbol: '' if symbol in "-+*/^:snlgm|" else '*'
-                expression = (
-                    (t1 := expression[:priority_brackets[0]]) +
-                    add_multiplication(t1[-1])+
-                    str(self.SimpleExpressionCalculation(inner_expression)) +
-                    (add_multiplication(t2[0]) +
-                    t2 if len(t2 := expression[priority_brackets[1] + 1:]) != 0 else '')
-                )
-            self.result = self.removing_zeros(str(self.SimpleExpressionCalculation(expression)))
-        except Exception as e:
-            print(e)
-            traceback.print_exc()
-            self.result = "Error"
+        expression = expression.replace(" ", "")
+        if expression == "": self.result = "0"
+        else:
+            try:
+                expression = str(self.Debuger(expression))
+                while (count_brackets := expression.count("(")) != 0:
+                    print("1")
+                    priority_brackets = self._searching_for_priority_brackets(
+                        expression, 
+                        count_brackets
+                    )
+                    inner_expression = expression[priority_brackets[0] + 1:priority_brackets[1]]
+                    print(4)
+                    add_multiplication = lambda symbol: '' if symbol in "-+*/^:snlgm|" else '*'
+                    expression = (
+                        (t1 := expression[:priority_brackets[0]]) +
+                        add_multiplication(t1[-1])+
+                        str(self.SimpleExpressionCalculation(inner_expression)) +
+                        (add_multiplication(t2[0]) +
+                        t2 if len(t2 := expression[priority_brackets[1] + 1:]) != 0 else '')
+                    )
+                self.result = self.removing_zeros(str(self.SimpleExpressionCalculation(expression)))
+            except Exception as e:
+                print(e)
+                traceback.print_exc()
+                self.result = "Error"
 
     def __str__(self):
         return self.result
