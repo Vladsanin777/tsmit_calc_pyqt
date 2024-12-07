@@ -25,25 +25,23 @@ class TitleLayout(QHBoxLayout):
         self.window = window
         self.setContentsMargins(0, 0, 0, 0)
         self.setSpacing(0)
-        self.addWidget(ButtonBase("+ Add", callback = self.add_window, font_size = 15, window = window))
-        self.addWidget(ButtonBase("EN", callback=self.language_callback, font_size = 15, window = window))
-        self.addWidget(ButtonBase("Fon", callback=Data.app.change_fon, font_size = 15, window = window))
+        self.addWidget(ButtonBase("+ Add", callback = self.add_window, font_size = 15, window = window, is_addition_callback = False))
+        self.addWidget(ButtonBase("EN", callback=self.language_callback, font_size = 15, window = window, is_addition_callback = False))
+        self.addWidget(ButtonBase("Fon", callback=Data.app.change_fon, font_size = 15, window = window, is_addition_callback = False))
         self.addWidget(ButtonBase(
             "View",
             menu=TitleMenu([
-                ButtonBase("Global History", callback=self.global_histori_callback, font_size = 15, window = window),
+                ButtonBase("Global History", callback=self.global_histori_callback, font_size = 15, window = window, is_addition_callback = False),
                 ButtonBase("Local History", menu=TitleMenu([
-                    ButtonBase("Basic", callback=self.local_histori_basic_callback, font_size = 15, window = window),
-                    ButtonBase("Integral", callback=self.local_histori_integral_callback, font_size = 15, window = window),
+                    ButtonBase("Basic", callback=self.local_histori_basic_callback, font_size = 15, window = window, is_addition_callback = False),
+                    ButtonBase("Integral", callback=self.local_histori_integral_callback, font_size = 15, window = window, is_addition_callback = False),
                     ButtonBase("Tab 3", font_size = 15, window = window),
                     ButtonBase("Tab 4", font_size = 15, window = window)
                 ]), font_size = 15, window = window)
-            ]), font_size = 15,
-            window = window
+            ]), font_size = 15, window = window
         ))
 
     def add_window(self):
-        Data.count_window += 1
         Data.app.add_window()
     def language_callback(self):
         print("Language button clicked")

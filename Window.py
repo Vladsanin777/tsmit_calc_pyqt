@@ -15,15 +15,6 @@ from Grid import (
     GridCalculateKeybord, GridCalculateCommon
 )
 
-"""
-class GradientWindow(QLinearGradient):
-    def __init__(self):
-        super().__init__(0, 0, 1, 1)
-        self.setCoordinateMode(QLinearGradient.CoordinateMode.ObjectBoundingMode)
-        self.setColorAt(0.0, QColor("rgb(140, 0, 0)"))
-        self.setColorAt(0.5, QColor("black"))
-        self.setColorAt(1.0, QColor("rgb(0, 0, 140)"))
-"""
 
 
 
@@ -52,15 +43,20 @@ class Window(QWidget):
     resize_global_histori: HistoriWidget
     global_histori: HistoriScroll
     set_for_result: QPushButton
-    add_local_histori: list[HistoriWidget] = list()
-    resize_local_histori: list[HistoriWidget] = list()
-    local_histori: list[HistoriScroll] = list()
-    line_edit: list[list[QLineEdit]] = list()
-    inputtin: list[int] = [0, 0]
-    result: list[str] = [["0"], ["0", "0", "0", "0"]]
+    add_local_histori: list[HistoriWidget]
+    resize_local_histori: list[HistoriWidget]
+    local_histori: list[HistoriScroll]
+    line_edit: list[list[QLineEdit]]
+    inputtin: list[int]
+    result: list[list[str]]
     def __init__(self):
-
-
+        
+        self.add_local_histori = list()
+        self.resize_local_histori = list()
+        self.local_histori = list()
+        self.line_edit = list()
+        self.inputtin = [0, 0]
+        self.result = [["0"], ["0", "0", "0", "0"]]
         super().__init__()
         self.setLayout(MainLayout(self))
         self.setWindowTitle("Calculate")

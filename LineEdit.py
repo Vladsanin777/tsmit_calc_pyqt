@@ -3,7 +3,7 @@ from PyQt6.QtGui import QDrag, QPainter, QLinearGradient, QFont, QBrush, QTextOp
 from PyQt6.QtCore import pyqtSignal, Qt
 from PyQt6.QtGui import QFocusEvent
 from LogicButton import LogicCalculate
-from UI import StyleButton
+from UI import StyleButton, StyleLineEdit
 class LineEdit(QLineEdit):
     cursorEntered = pyqtSignal()
     def __init__(self, window):
@@ -13,9 +13,9 @@ class LineEdit(QLineEdit):
         self.setObjectName("keybord")
         self.textChanged.connect(self.on_entry_changed)
         font = self.font()
-        font.setPointSize(20)
+        font.setPointSize(25)
         self.setFont(font)
-        self.setMaximumHeight(30)
+        self.setMaximumHeight(40)
         self.setContentsMargins(0, 0, 0, 0)
     def focusInEvent(self, event: QFocusEvent):
             if event.reason():
@@ -40,4 +40,5 @@ class LineEdit(QLineEdit):
             else:
                 logic_calc.button_other()
     def paintEvent(self, event):
-        StyleButton(self, self.window)
+        super().paintEvent(event)
+        StyleLineEdit(self, self.window)

@@ -6,11 +6,11 @@ from PyQt6.QtCore import Qt, QMimeData, QRectF
 from PyQt6.QtGui import QDrag
 from UI import StyleButton
 class ButtonBase(QPushButton):
-    def __init__(self, label, *, callback=None, menu=None, css_name = "title-menu-button", window, font_size = 20, min_width = 64, max_width = 0):
+    def __init__(self, label, *, callback=None, menu=None, css_name = "title-menu-button", window, font_size = 20, min_width = 64, max_width = 0, is_addition_callback = True):
         self.window = window
         super().__init__(label)
         if callback:
-            self.clicked.connect(partial(callback, self, window) if window else callback)
+            self.clicked.connect(partial(callback, self, window) if is_addition_callback else callback)
         if menu:
             self.setMenu(menu)
         self.setObjectName(css_name)

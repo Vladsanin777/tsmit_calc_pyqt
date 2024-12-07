@@ -76,6 +76,7 @@ class EpsIntegral(QHBoxLayout):
 
 class GridIntegralCalc(QGridLayout):
     def __init__(self, window):
+        print(window)
         super().__init__()
         self.setSpacing(0)
         self.setContentsMargins(0, 0, 0, 0)
@@ -100,4 +101,4 @@ class GridIntegralCalc(QGridLayout):
         window.line_edit[1][3].cursorEntered.connect(lambda: setattr(window, 'inputtin', [1, 3]))
         self.addWidget(window.line_edit[1][3], 3, 0, 1, 6)
         
-
+        print(window.line_edit)

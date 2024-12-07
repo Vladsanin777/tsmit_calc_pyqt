@@ -64,14 +64,20 @@ class Application(QApplication):
                 border: none;
                 margin: 0px;
             }
-            
+            QLineEdit {
+                background: transparent;
+                border: 1px solid white;
+                text-align: center;
+                color: transparent;
+            }
         """)
         
     def change_fon(self):
         """self.setPalette(PaletteWindow())"""
     def add_window(self):
-            window = Window()
-            setattr(self, "window_" + str(Data.count_window), window)
+        print(Data.count_window, 1003)
+        setattr(self, "window_" + str(Data.count_window), Window())
+        Data.count_window += 1
 
 Data.app = Application()
 Data.app.add_window()

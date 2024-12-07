@@ -69,3 +69,39 @@ class StyleButton(QPainter):
 
         self.end()
 
+class StyleLineEdit(QPainter):
+    def __init__(self, parent, window):
+        # Создаём QPainter
+        super().__init__(parent)
+        self.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+
+        # Настройка шрифта и метрик
+        metrics = QFontMetrics(parent.font())
+        text = parent.text()
+
+         # Получаем смещение текста (начало видимой области)
+        scroll_offset = parent.cursorRect().x() - metrics.horizontalAdvance(text[:parent.cursorPosition()])
+
+        # Вычисляем начальную позицию текста с учётом прокрутки
+        text_x = scroll_offset+5
+        text_y = (parent.height() + metrics.ascent() - metrics.descent()) / 2
+
+        # Создаём путь для текста
+        path = QPainterPath()
+        path.addText(text_x, text_y, self.font(), text)
+
+        # Рисуем обводку текста
+        pen = QPen(QColor("white"))
+        pen.setWidth(2)
+        self.setPen(pen)
+        self.setBrush(Qt.BrushStyle.NoBrush)
+        self.drawPath(path)
+
+        # Рисуем текст с градиентом
+        self.setBrush(QBrush(CreateGradient(parent, window)))
+        self.setPen(Qt.PenStyle.NoPen)
+        self.drawPath(path)
+
+        # Завершаем рисование
+        self.end()
