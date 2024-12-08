@@ -88,7 +88,7 @@ class TabWidgetKeybord(QTabWidget):
         self.addTab(TabQWidget(GridCalculateKeybord([["+", "-", ":", "*", "^"], ["!", "sqrt", "ln", "log", "lg"]], window)), "operators")
         self.addTab(TabQWidget(GridCalculateKeybord([["_E", "_PI"]], window)), "consts")
         self.addTab(TabQWidget(GridCalculateKeybord([["0x", "0b", "0t"]], window)), "number system")
-        self.addTab(TabQWidget(GridCalculateKeybord([["round", "mod", ".", "|"]], window)), "other")
+        self.addTab(TabQWidget(GridCalculateKeybord([["%", "mod", ".", "|"]], window)), "other")
     def paintEvent(self, event):
         self.tab_bar.set_style()
 

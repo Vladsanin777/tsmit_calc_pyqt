@@ -24,21 +24,20 @@ class LineEdit(QLineEdit):
 
     def on_entry_changed(self, text_line_edit):
         logic_calc = LogicCalculate(text_line_edit, self.window)
-        if text_line_edit: # если убрать это условие то будет срабатывать button other() с самого начала и будет ошибка
-            if "_ALL" in text_line_edit:
-                logic_calc.button__ALL()
-            elif "_DO" in text_line_edit:
-                logic_calc.button__DO()
-            elif "_POST" in text_line_edit:
-                logic_calc.button__POST()
-            elif "_O" in text_line_edit:
-                logic_calc.button__O()
-            elif "=" in text_line_edit:
-                logic_calc.button_result()
-            elif "_RES" in text_line_edit:
-                logic_calc.button_result()
-            else:
-                logic_calc.button_other()
+        if "_ALL" in text_line_edit:
+            logic_calc.button__ALL()
+        elif "_DO" in text_line_edit:
+            logic_calc.button__DO()
+        elif "_POST" in text_line_edit:
+            logic_calc.button__POST()
+        elif "_O" in text_line_edit:
+            logic_calc.button__O()
+        elif "=" in text_line_edit:
+            logic_calc.button_result()
+        elif "_RES" in text_line_edit:
+            logic_calc.button_result()
+        else:
+            logic_calc.button_other()
     def paintEvent(self, event):
         super().paintEvent(event)
         StyleLineEdit(self, self.window)

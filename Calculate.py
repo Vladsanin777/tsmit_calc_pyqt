@@ -96,7 +96,15 @@ class Calculate:
         # Разбиение строки на отдельные элементы (числа и операторы)
         def __init__(self, expression: str):
             # sheach first digit
-            positions = [element_i for element_i in range(len(expression)) if "%!-+*/:^sngol|".find(expression[element_i]) != -1]
+            hex_i: int = expression[1]=='x' if len(expression) > 1 else False
+            positions: list[int] = list() 
+            for element_i in range(len(expression)):
+                if "%!-+*/:^sngolm|".find(expression[element_i]) != -1 and not ("-+".find(expression[element_i]) and "Ee".find(expression[element_i-1]) != -1 and not hex_i):
+                    positions.append(element_i)
+                    hex_i = expression[element_i+2] == 'x' if len(expression) > element_i+3 else False
+
+
+                    
             print(positions, 78)
             result_list = list()
             while positions != []:
@@ -136,10 +144,7 @@ class Calculate:
             return tokens
             
         def is_not_operator(self, number_or_operator):
-            match number_or_operator:
-                case "^" | "*" | "/" | "+" | "-" | "|" | ":":
-                    return False
-            return True
+            return "%!-+*/:^sngol|m".find(number_or_operator) == -1
 
         def not_operator(self, tokens):
             print(tokens, len(tokens), "len")
@@ -184,6 +189,12 @@ class Calculate:
                         self.FloatDecimal(tokens[priority_operator_index-1]).float() /
                         self.FloatDecimal(tokens.pop(priority_operator_index)).float()
                     )
+                elif "m" in tokens:
+                    tokens.pop(priority_operator_index := tokens_index("m"))
+                    tokens[priority_operator_index-1] = str(
+                        self.FloatDecimal(tokens[priority_operator_index-1]).float() %
+                        self.FloatDecimal(tokens.pop(priority_operator_index)).float()
+                    )
                 elif "-" in tokens:
                     tokens.pop(priority_operator_index := tokens_index("-"))
                     tokens[priority_operator_index-1] = str(
@@ -202,52 +213,50 @@ class Calculate:
                     while len(tokens) > 1:
                         tokens.pop()
             print(tokens[0])
-            return str(self.FloatDecimal(tokens[0]))
+            return str(self.FloatDecimal(tokens[0]).float()+Decimal(0.0))
             
         # Calculate persent and factorial
         def _calculate_expression_list(self, tokens: list[str]) -> str:
             print(tokens)
-            t: int
-            while '%' in tokens:
-                t = tokens.index('%')
-                print(tokens)
-                print(t)
-                tokens.pop(t)
-                print(tokens[t-1])
-                tokens[t-1] = str(self.FloatDecimal(tokens[t-1]).float() / self.FloatDecimal(str(100)).float())
-            while '!' in tokens:
-                t = tokens.index('!')
-                tokens.pop(t)
-                tokens[t-1] = str(factorial(int(self.FloatDecimal(tokens[t-1]).float())))
-            while 'n' in tokens:
-                t = tokens.index('n')
-                tokens.pop(t)
-                tokens[t] = str(log(float(self.FloatDecimal(tokens[t]).float())))
-                print(tokens, 67)
-            while 'g' in tokens:
-                t = tokens.index('g')
-                tokens.pop(t)
-                print(tokens[t], 45)
-                tokens[t] = str(log10(float(self.FloatDecimal(tokens[t]).float())))
-            while 's' in tokens:
-                t = tokens.index('s')
-                tokens.pop(t)
-                tokens[t] = str(sqrt(float(self.FloatDecimal(tokens[t]).float())))
-            while 'l' in tokens:
-                t = tokens.index('l')
-                tokens.pop(t)
-                if len(tokens) >= t+2:
-                    print(True)
-                    if tokens[t+1] == '|':
-                        tokens.pop(t+1)
-                        tokens[t] = str(log(float(self.FloatDecimal(tokens[t]).float()), float(self.FloatDecimal(tokens.pop(t+1) if len(tokens) >= t+2 else str(e)).float())))
-                    else:
-                        tokens[t] = str(log(float(self.FloatDecimal(tokens[t]).float())))
+            position: list[int] = [element_i for element_i in range(len(tokens)) if "%!ngsl".find(tokens[element_i]) != -1]
+            print(position)
+            step: int = 0
+            for index in position:
+                index -= step
+                step += 1
+                if '%' == tokens[index]:
+                    print(tokens)
+                    tokens.pop(index)
+                    print(tokens[index-1])
+                    tokens[index-1] = str(self.FloatDecimal(tokens[index-1]).float() / self.FloatDecimal(str(100)).float())
+                elif '!' == tokens[index]:
+                    tokens.pop(index)
+                    tokens[index-1] = str(factorial(int(self.FloatDecimal(tokens[index-1]).float())))
+                elif 'n' == tokens[index]:
+                    tokens.pop(index)
+                    tokens[index] = str(log(float(self.FloatDecimal(tokens[index]).float())))
+                    print(tokens, 67)
+                elif 'g' == tokens[index]:
+                    tokens.pop(index)
+                    print(tokens[index], 45)
+                    tokens[index] = str(log10(float(self.FloatDecimal(tokens[index]).float())))
+                elif 's' == tokens[index]:
+                    tokens.pop(index)
+                    tokens[index] = str(sqrt(float(self.FloatDecimal(tokens[index]).float())))
+                elif 'l' == tokens[index]:
+                    tokens.pop(index)
+                    if len(tokens) >= index+2:
+                        print(True)
+                        if tokens[t+1] == '|':
+                            tokens.pop(index+1)
+                            tokens[index] = str(log(float(self.FloatDecimal(tokens[index]).float()), float(self.FloatDecimal(tokens.pop(index+1) if len(tokens) >= t+2 else str(e)).float())))
+                        else:
+                            tokens[index] = str(log(float(self.FloatDecimal(tokens[index]).float())))
 
-                else:
-                    print(False)
-                    tokens[t] = str(log(float(self.FloatDecimal(tokens[t]).float())))
-                print(890)
+                    else:
+                        print(False)
+                        tokens[index] = str(log(float(self.FloatDecimal(tokens[index]).float())))
+                    print(890)
 
             return self._calculate_expression_base(tokens)
         class FloatDecimal:

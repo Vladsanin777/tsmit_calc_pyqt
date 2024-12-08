@@ -66,6 +66,7 @@ class Window(QWidget):
         self.show()
     def paintEvent(self, event):
         # Создаём градиент, который охватывает всю область окна
+        
         gradient = QLinearGradient(0, 0, self.width(), self.height())
         gradient.setColorAt(0.0, QColor(100, 0, 0))  # Красный
         gradient.setColorAt(0.5, QColor(0, 0, 0))    # Чёрный
