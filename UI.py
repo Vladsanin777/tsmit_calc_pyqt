@@ -10,8 +10,7 @@ class CreateGradient(QLinearGradient):
         x = position_widget.x() - position_window.x()
         width = window.width()
         height = window.height()
-        #super().__init__(x, y, x + width, y - height)
-        super().__init__(x, y, width - x, y - height)
+        super().__init__(-x, -y, width // 2, height // 2)
         for colorAt in list_gradient:
             self.setColorAt(colorAt[0], colorAt[1])
 
