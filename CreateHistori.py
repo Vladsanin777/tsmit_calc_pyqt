@@ -12,19 +12,20 @@ class HistoriVBox(QVBoxLayout):
         self.setObjectName("histori")
 
 class HistoriWidget(QWidget):
-    _add_histori: HistoriVBox
+    __add_histori: HistoriVBox
     def __init__(self):
         super().__init__()
         self.setObjectName("histori")
-        self._add_histori = HistoriVBox()
-        self.setLayout(self._add_histori)
+        self.__add_histori = HistoriVBox()
+        self.setLayout(self.__add_histori)
         self.setContentsMargins(0, 0, 0, 0)
-    def getAddHistori(self):
-        return self._add_histori
+    @property
+    def add_histori(self):
+        return self.__add_histori
 
 class HistoriScroll(QScrollArea):
-    _add_histori: HistoriVBox
-    _resize_histori: HistoriWidget
+    __add_histori: HistoriVBox
+    __resize_histori: HistoriWidget
     def __init__(self):
         super().__init__()
         # self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)  # Всегда отображать полосу прокрутки
@@ -32,12 +33,14 @@ class HistoriScroll(QScrollArea):
         self.setObjectName("histori")
         self.setWidgetResizable(True)  # Виджет содержимого будет автоматически подгоняться под ширину
         self.setMinimumHeight(100)
-        self._resize_histori = HistoriWidget()
-        self.setWidget(self._resize_histori)
-        self._add_histori = self._resize_histori.getAddHistori()
+        self.__resize_histori = HistoriWidget()
+        self.setWidget(self.__resize_histori)
+        self.__add_histori = self.__resize_histori.add_histori
 
-    def getResizeHistori(self):
-        return self._resize_histori
-    def getAddHistori(self):
-        return self._add_histori
+    @property
+    def resize_histori(self):
+        return self.__resize_histori
+    @property
+    def add_histori(self):
+        return self.__add_histori
     

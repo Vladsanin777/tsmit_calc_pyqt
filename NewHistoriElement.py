@@ -36,7 +36,7 @@ class LabelHistori(QLabel):
 class BoxHistoriElement(QHBoxLayout):
     def __init__(self, expression: str, window):
         super().__init__()
-        result: str = window.activateResult()
+        result: str = window.result
         self.setSpacing(0)
         self.setContentsMargins(0, 0, 0, 0)
         self.addWidget(LabelHistori(expression, "keybord", window))

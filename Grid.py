@@ -59,14 +59,13 @@ class GridBasicCalc(QGridLayout):
         super().__init__()
         self.setSpacing(0)
         self.setContentsMargins(0, 0, 0, 0)
-        window.local_histori.append(HistoriScroll())
-        window.add_local_histori.append(window.local_histori[-1].getAddHistori())
-        window.resize_local_histori.append(window.local_histori[-1].getResizeHistori())
-        self.addWidget(window.local_histori[-1])
-        window.line_edit.append(list())
-        window.line_edit[0].append(LineEdit(window))
-        window.line_edit[0][0].cursorEntered.connect(lambda: setattr(window, 'inputtin', [0, 0]))
-        self.addWidget(window.line_edit[0][0])
+        local_histori = HistoriScroll()
+        window.local_histori = local_histori
+        self.addWidget(local_histori)
+        line_edit = LineEdit(window)
+        window.line_edit = 0, line_edit
+        line_edit.cursorEntered.connect(lambda: setattr(window, '__inputtin', [0, 0]))
+        self.addWidget(line_edit)
 
 class EpsIntegral(QHBoxLayout):
     def __init__(self, button: ButtonBase, line_edit: LineEdit):
@@ -80,25 +79,25 @@ class GridIntegralCalc(QGridLayout):
         super().__init__()
         self.setSpacing(0)
         self.setContentsMargins(0, 0, 0, 0)
-        window.local_histori.append(HistoriScroll())
-        window.add_local_histori.append(window.local_histori[-1].getAddHistori())
-        window.resize_local_histori.append(window.local_histori[-1].getResizeHistori())
-        self.addWidget(window.local_histori[-1], 0, 0, 1, 6)
-        window.line_edit.append(list())
-        window.line_edit[1].append(LineEdit(window))
-        window.line_edit[1][0].cursorEntered.connect(lambda: setattr(window, 'inputtin', [1, 0]))
-        self.addLayout(EpsIntegral(ButtonBase("EPS = ", css_name = "calculate", min_width = 92, max_width = 90, window = window), window.line_edit[1][0]), 1, 0, 1, 6)
+        local_histori = HistoriScroll()
+        window.local_histori = local_histori
+        self.addWidget(local_histori, 0, 0, 1, 6)
+        eps_line_edit = LineEdit(window)
+        window.line_edit = 1, eps_line_edit
+        eps_line_edit.cursorEntered.connect(lambda: setattr(window, 'inputtin', [1, 0]))
+        self.addLayout(EpsIntegral(ButtonBase("EPS = ", css_name = "calculate", min_width = 92, max_width = 90, window = window), eps_line_edit), 1, 0, 1, 6)
         self.addWidget(ButtonBase("a = ", css_name = "calculate", max_width = 45, window = window), 2, 0, 1, 1)
-        window.line_edit[1].append(LineEdit(window))
-        window.line_edit[1][1].cursorEntered.connect(lambda: setattr(window, 'inputtin', [1, 1]))
-        self.addWidget(window.line_edit[1][1], 2, 1, 1, 2)
+        a_line_edit = LineEdit(window)
+        window.line_edit = 1, a_line_edit
+        a_line_edit.cursorEntered.connect(lambda: setattr(window, 'inputtin', [1, 1]))
+        self.addWidget(a_line_edit, 2, 1, 1, 2)
         self.addWidget(ButtonBase("b = ", css_name = "calculate", max_width = 45, window = window), 2, 3, 1, 1)
-        window.line_edit[1].append(LineEdit(window))
-        window.line_edit[1][2].cursorEntered.connect(lambda: setattr(window, 'inputtin', [1, 2]))
-        self.addWidget(window.line_edit[1][2], 2, 4, 1, 2)
-
-        window.line_edit[1].append(LineEdit(window))
-        window.line_edit[1][3].cursorEntered.connect(lambda: setattr(window, 'inputtin', [1, 3]))
-        self.addWidget(window.line_edit[1][3], 3, 0, 1, 6)
+        b_line_edit = LineEdit(window)
+        window.line_edit = b_line_edit
+        b_line_edit.cursorEntered.connect(lambda: setattr(window, 'inputtin', [1, 2]))
+        self.addWidget(b_line_edit, 2, 4, 1, 2)
+        main_line_edit = LineEdit(window)
+        window.line_edit = main_line_edit
+        main_line_edit.cursorEntered.connect(lambda: setattr(window, 'inputtin', [1, 3]))
+        self.addWidget(main_line_edit, 3, 0, 1, 6)
         
-        print(window.line_edit)

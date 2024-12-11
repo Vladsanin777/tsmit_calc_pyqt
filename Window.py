@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QLineEdit,
+    QWidget, QVBoxLayout,
     QPushButton
 )
 from PyQt6.QtGui import QPainter, QLinearGradient, QColor, QBrush
@@ -14,9 +14,9 @@ from TabWindow import (
 from Grid import (
     GridCalculateKeybord, GridCalculateCommon
 )
+from UI import CreateGradient
 
-
-
+from LineEdit import LineEdit
 
 # Main Content
 class MainLayout(QVBoxLayout):
@@ -26,75 +26,129 @@ class MainLayout(QVBoxLayout):
         self.setSpacing(0)
         self.addWidget(TitleBar(window))
         window.global_histori = HistoriScroll()
-        window.add_global_histori = window.global_histori.getAddHistori()
-        window.resize_global_histori = window.global_histori.getResizeHistori()
+        window.add_global_histori = window.global_histori.add_histori
+        window.resize_global_histori = window.global_histori.resize_histori
         self.addWidget(window.global_histori)
-        window.main_tab_widget = MainTabWidget(window)
-        self.addWidget(window.main_tab_widget)
-        print(4)
+        self.addWidget(MainTabWidget(window))
         self.addLayout(GridCalculateCommon(window))
-        window.tab_widget_keybord = TabWidgetKeybord(window)
-        self.addWidget(window.tab_widget_keybord)
+        self.addWidget(TabWidgetKeybord(window))
         
 # Window
 class Window(QWidget):
 
-    add_global_hitori: HistoriVBox
-    resize_global_histori: HistoriWidget
-    global_histori: HistoriScroll
-    set_for_result: QPushButton
-    add_local_histori: list[HistoriWidget]
-    resize_local_histori: list[HistoriWidget]
-    local_histori: list[HistoriScroll]
-    line_edit: list[list[QLineEdit]]
-    inputtin: list[int]
-    result: list[list[str]]
+    __add_global_hitori: HistoriVBox
+    __resize_global_histori: HistoriWidget
+    __global_histori: HistoriScroll
+    __set_for_result: QPushButton
+    __add_local_histori: list[HistoriWidget]
+    __resize_local_histori: list[HistoriWidget]
+    __local_histori: list[HistoriScroll]
+    __line_edit: list[list[LineEdit]]
+    __inputtin: list[int]
+    __result: list[list[str]]
     def __init__(self):
         
-        self.add_local_histori = list()
-        self.resize_local_histori = list()
-        self.local_histori = list()
-        self.line_edit = list()
-        self.inputtin = [0, 0]
-        self.result = [["0"], ["0", "0", "0", "0"]]
+        self.__add_local_histori = list()
+        self.__resize_local_histori = list()
+        self.__local_histori = list()
+        self.__line_edit = [[], []]
+        self.__inputtin = [0, 0]
+        self.__result = [["0"], ["0", "0", "0", "0"]]
         super().__init__()
         self.setLayout(MainLayout(self))
         self.setWindowTitle("Calculate")
         self.resize(400, 800)
         self.setObjectName("window")
-        #self.gradient = GradientWindow()
         self.show()
-    def paintEvent(self, event):
-        # Создаём градиент, который охватывает всю область окна
-        
-        gradient = QLinearGradient(0, 0, self.width(), self.height())
-        gradient.setColorAt(0.0, QColor(100, 0, 0))  # Красный
-        gradient.setColorAt(0.5, QColor(0, 0, 0))    # Чёрный
-        gradient.setColorAt(1.0, QColor(0, 0, 100))  # Синий
-
+    def paintEvent(self, event) -> None:
         # Создаём QPainter для рисования
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         # Применяем градиент как кисть и заполняем окно
-        brush = QBrush(gradient)
-        painter.fillRect(self.rect(), brush)
-    def activateLocalHistori(self):
-        return self.local_histori[self.inputtin[0]]
-    def activateAddLocalHistori(self):
-        return self.add_local_histori[self.inputtin[0]]
-    def activateResizeLocalHistori(self):
-        return self.resize_local_histori[self.inputtin[0]]
-    def globalHistori(self):
-        return self.global_histori
-    def addGlobalHistori(self):
-        return self.add_global_histori
-    def resizeGlobalHistori(self):
-        return self.resize_global_histori
-    def activateLineEdit(self):
-        return self.line_edit[self.inputtin[0]][self.inputtin[1]]
-    def activateResult(self):
-        return self.result[self.inputtin[0]][self.inputtin[1]]
-    def activateSetResult(self, new_result):
-        print(self.result)
-        self.result[self.inputtin[0]][self.inputtin[1]] = new_result
+        painter.fillRect(self.rect(), 
+            QBrush(CreateGradient(
+                None, self,
+                list_gradient = [
+                    [0.0, QColor(100, 0, 0)],
+                    [0.5, QColor(0, 0, 0)],
+                    [1.0, QColor(0, 0, 100)]
+                ]
+            ))
+        )
+        return
+    @property
+    def local_histori(self) -> HistoriScroll:
+        return self.__local_histori[self.__inputtin[0]]
+    @local_histori.setter
+    def local_histori(self, new_local_histori: HistoriScroll) -> None:
+        if isinstance(new_local_histori, HistoriScroll):
+            self.__local_histori.append(new_local_histori)
+            self.add_local_histori = new_local_histori.add_histori
+            self.resize_local_histori = new_local_histori.resize_histori
+        return
+    @property
+    def add_local_histori(self) -> HistoriVBox:
+        return self.__add_local_histori[self.__inputtin[0]]
+    
+    @add_local_histori.setter
+    def add_local_histori(self, new_add_local_histori: HistoriVBox) -> None:
+        if isinstance(new_add_local_histori, HistoriVBox):
+            self.__add_local_histori.append(new_add_local_histori)
+        return
+    
+    @property
+    def resize_local_histori(self) -> HistoriWidget:
+        return self.__resize_local_histori[self.__inputtin[0]]
+    @resize_local_histori.setter
+    def resize_local_histori(self, new_resize_local_histori: HistoriWidget) -> None:
+        if isinstance(new_resize_local_histori, HistoriWidget):
+            self.__resize_local_histori.append(new_resize_local_histori)
+        return
+    @property
+    def global_histori(self) -> HistoriScroll:
+        return self.__global_histori
+    @global_histori.setter
+    def global_histori(self, new_global_histori: HistoriScroll) -> None:
+        if isinstance(new_global_histori, HistoriScroll):
+            self.__global_histori = new_global_histori
+            self.__add_global_histori = new_global_histori.add_histori
+            self.__resize_global_histori = new_global_histori.resize_histori
+        return
+    @property
+    def add_global_histori(self) -> HistoriVBox:
+        return self.__add_global_histori
+    @add_global_histori.setter
+    def add_global_histori(self, new_add_global_histori: HistoriVBox) -> None:
+        if isinstance(new_add_global_histori, HistoriVBox):
+            self.__add_global_histori = new_add_global_histori
+        return
+    @property
+    def resize_global_histori(self) -> HistoriWidget:
+        return self.__resize_global_histori
+    @resize_global_histori.setter
+    def resize_global_histori(self, new_resize_global_histori: HistoriWidget) -> None:
+        if isinstance(new_resize_global_histori, HistoriWidget):
+            self.__resize_global_histori = new_resize_global_histori
+        return
+    @property
+    def line_edit(self) -> LineEdit:
+        print(self.__line_edit)
+        return self.__line_edit[self.__inputtin[0]][self.__inputtin[1]]
+    """
+    def line_edit(self, tab: int, element: int) -> LineEdit:
+        if isinstance(tab, int) and isinstance(element, int):
+            return self.__line_edit[tab][element]
+    """
+    @line_edit.setter
+    def line_edit(self, value: tuple[int, LineEdit]) -> None:
+        if isinstance(value, tuple) and len(value) == 2 and \
+                isinstance(value[0], int) and isinstance(value[1], LineEdit):
+            self.__line_edit[value[0]].append(value[1])
+        return
+    @property
+    def result(self) -> str:
+        return self.__result[self.__inputtin[0]][self.__inputtin[1]]
+    @result.setter
+    def result(self, new_result) -> None:
+        self.__result[self.__inputtin[0]][self.__inputtin[1]] = new_result

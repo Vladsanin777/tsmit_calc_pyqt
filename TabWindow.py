@@ -11,18 +11,19 @@ from UI import CreateGradient
 
 
 class CustomTabBar(QTabBar):
+    gradient: CreateGradient
+    
     def __init__(self, tab_widget, window):
         super().__init__()
         self.tab_widget = tab_widget
         self.window = window
-        self.gradients = []
         font = self.font()
         font.setPointSize(20)
         self.setFont(font)
 
     def set_style(self):
-        # Задаем уникальные градиенты для каждой вкладки
-        self.gradients = [CreateGradient(self.tab_widget, self.window, is_tab=True) for _ in range(4)]
+        # Задаем градиенты
+        self.gradient = CreateGradient(self.tab_widget, self.window)
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
@@ -61,11 +62,9 @@ class CustomTabBar(QTabBar):
             painter.drawPath(path)
 
             # Установка градиента для вкладки
-            if self.gradients:
-                gradient = self.gradients[index % len(self.gradients)]
-                painter.setBrush(QBrush(gradient))
-                painter.setPen(Qt.PenStyle.NoPen)
-                painter.drawPath(path)
+            painter.setBrush(QBrush(self.gradient))
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.drawPath(path)
 
         painter.end()
 

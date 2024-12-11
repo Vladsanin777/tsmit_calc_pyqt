@@ -28,14 +28,14 @@ class LineEdit(QLineEdit):
             logic_calc.button__ALL()
         elif "_DO" in text_line_edit:
             logic_calc.button__DO()
-        elif "_POST" in text_line_edit:
-            logic_calc.button__POST()
+        elif "_POS" in text_line_edit:
+            logic_calc.button__POS()
         elif "_O" in text_line_edit:
             logic_calc.button__O()
         elif "=" in text_line_edit:
-            logic_calc.button_result()
+            pass
         elif "_RES" in text_line_edit:
-            logic_calc.button_result()
+            logic_calc.button__RES()
         else:
             logic_calc.button_other()
     def paintEvent(self, event):

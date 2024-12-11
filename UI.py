@@ -2,15 +2,17 @@ from PyQt6.QtGui import QDrag, QPainter, QLinearGradient, QFont, QBrush, QTextOp
 from PyQt6.QtCore import Qt, QPoint
 
 class CreateGradient(QLinearGradient):
-    def __init__(self, widget, window, *, list_gradient: list[list[int, Qt.GlobalColor]] = [[0, Qt.GlobalColor.red], [1, Qt.GlobalColor.blue]], is_tab = False):
-
-        position_widget = widget.mapToGlobal(QPoint(0, 0))
-        position_window = window.mapToGlobal(QPoint(0, 0))
-        y = position_widget.y() - position_window.y()
-        x = position_widget.x() - position_window.x()
+    def __init__(self, widget, window, *, list_gradient: list[list[int, Qt.GlobalColor]] = [[0, Qt.GlobalColor.red], [1, Qt.GlobalColor.blue]]):
         width = window.width()
         height = window.height()
-        super().__init__(-x, -y, width // 2, height // 2)
+        if widget:
+            position_widget = widget.mapToGlobal(QPoint(0, 0))
+            position_window = window.mapToGlobal(QPoint(0, 0))
+            y = position_widget.y() - position_window.y()
+            x = position_widget.x() - position_window.x()
+            super().__init__(-x, -y, width // 2, height // 2)
+        else:
+            super().__init__(0, 0, width, height)
         for colorAt in list_gradient:
             self.setColorAt(colorAt[0], colorAt[1])
 

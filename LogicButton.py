@@ -11,43 +11,43 @@ class LogicCalculate():
 
     def button__ALL(self):
         if (line_edit_text := "".join(self.line_edit_text.split("_ALL"))) != "":
-            self.window.addGlobalHistori().addLayout(BoxHistoriElement(line_edit_text, self.window))
-            self.window.resizeGlobalHistori().adjustSize()
-            self.window.globalHistori().verticalScrollBar().setValue(self.window.global_histori.verticalScrollBar().maximum())
+            self.window.add_global_histori.addLayout(BoxHistoriElement(line_edit_text, self.window))
+            self.window.resize_global_histori.adjustSize()
+            self.window.global_histori.verticalScrollBar().setValue(self.window.global_histori.verticalScrollBar().maximum())
 
-            self.window.activateAddLocalHistori().addLayout(BoxHistoriElement(line_edit_text, self.window))
+            self.window.add_local_histori.addLayout(BoxHistoriElement(line_edit_text, self.window))
 
-            self.window.activateResizeLocalHistori().adjustSize()
-            scroll_histori = self.window.activateLocalHistori()
+            self.window.resize_local_histori.adjustSize()
+            scroll_histori = self.window.local_histori
             scroll_histori.verticalScrollBar().setValue(scroll_histori.verticalScrollBar().maximum())
-            self.window.activateSetResult("0")
+            self.window.result = "0"
 
-        self.window.activateLineEdit().setText("")
+        self.window.line_edit.setText("")
 
         
     def button__DO(self):
         if (line_edit_text := "".join(line_edit_text_list := self.line_edit_text.split("_DO"))) != "":
             self.window.add_global_histori.addLayout(BoxHistoriElement(line_edit_text, self.window))
-            self.window.add_local_histori_basic.addLayout(BoxHistoriElement(line_edit_text, self.window))
-        self.window.line_edit_calc_basic.setText(line_edit_text_list[1])
+            self.window.add_local_histori.addLayout(BoxHistoriElement(line_edit_text, self.window))
+        self.window.line_edit.setText(line_edit_text_list[1])
 
-    def button__POST(self):
-        if (line_edit_text := "".join(line_edit_text_list := self.window.line_edit_calc_basic.text().split("_POST"))) != "":
+    def button__POS(self):
+        if (line_edit_text := "".join(line_edit_text_list := self.line_edit_text.split("_POS"))) != "":
             self.window.add_global_histori.addLayout(BoxHistoriElement(line_edit_text, self.window))
-            self.window.add_local_histori_basic.addLayout(BoxHistoriElement(line_edit_text, self.window))
-        self.window.line_edit_calc_basic.setText(line_edit_text_list[0])
+            self.window.add_local_histori.addLayout(BoxHistoriElement(line_edit_text, self.window))
+        self.window.line_edit.setText(line_edit_text_list[0])
 
-    def button_result(self):
-        result = self.window.activateResult()
-        if (line_edit_text := "".join(line_edit_text_list := self.line_edit_text.split("="))) != "":
-            self.window.addGlobalHistori().addLayout(BoxHistoriElement(line_edit_text, self.window))
-            self.window.resizeGlobalHistori().adjustSize()
-            self.window.globalHistori().verticalScrollBar().setValue(self.window.global_histori.verticalScrollBar().maximum())
-            self.window.activateAddLocalHistori().addLayout(BoxHistoriElement(line_edit_text, self.window))
-            self.window.activateResizeLocalHistori().adjustSize()
-            scroll_histori = self.window.activateLocalHistori()
+    def button__RES(self):
+        result = self.window.result
+        if (line_edit_text := "".join(line_edit_text_list := self.line_edit_text.split("_RES"))) != "":
+            self.window.add_global_histori.addLayout(BoxHistoriElement(line_edit_text, self.window))
+            self.window.resize_global_histori.adjustSize()
+            self.window.global_histori.verticalScrollBar().setValue(self.window.global_histori.verticalScrollBar().maximum())
+            self.window.add_local_histori.addLayout(BoxHistoriElement(line_edit_text, self.window))
+            self.window.resize_local_histori.adjustSize()
+            scroll_histori = self.window.local_histori
             scroll_histori.verticalScrollBar().setValue(scroll_histori.verticalScrollBar().maximum())
-        line_edit = self.window.activateLineEdit()
+        line_edit = self.window.line_edit
         line_edit.setText(result)
         line_edit.setCursorPosition(len(result)-1)
 
@@ -56,17 +56,17 @@ class LogicCalculate():
         if (line_edit_text := "".join(line_edit_text_list := self.line_edit_text.split("_O"))) != "":
             element_position = len(line_edit_text_list[0])-1
             print(element_position, "22")
-            self.window.line_edit_calc_basic.setText(self.line_edit_text[:element_position] + self.line_edit_text[element_position+3:])
+            self.window.line_edit.setText(self.line_edit_text[:element_position] + self.line_edit_text[element_position+3:])
             
     def button_other(self) -> None:
         print(3)
-        self.window.activateSetResult(result := str(Calculate(self.line_edit_text)))
+        self.window.result = (result := str(Calculate(self.line_edit_text)))
         self.window.set_for_result.setText(result)
     
     @staticmethod
     def inputing_line_edit(button, window) -> None:
         label: str = button.text()
-        line_edit = window.activateLineEdit()
+        line_edit = window.line_edit
         text: str = line_edit.text()
         position_cursor: int = line_edit.cursorPosition()
         line_edit.setText(text[:position_cursor] + label + text[position_cursor:])

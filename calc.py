@@ -62,6 +62,21 @@ class Application(QApplication):
                 text-align: center;
                 color: transparent;
             }
+            QScrollBar:vertical {
+                background: transparent;
+                border: none;
+            }
+            QScrollBar::handle:vertical {
+                background: rgba(255, 255, 255, 0.1);
+                border: none;
+            }
+            QScrollBar::handle:vertical:hover {
+                background: rgba(255, 255, 255, 0.3);
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical{
+                background: none;
+                height: 0;
+            }
         """)
         
     def change_fon(self):
