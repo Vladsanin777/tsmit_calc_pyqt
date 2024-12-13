@@ -62,9 +62,8 @@ class GridBasicCalc(QGridLayout):
         local_histori = HistoriScroll()
         window.local_histori = local_histori
         self.addWidget(local_histori)
-        line_edit = LineEdit(window)
+        line_edit = LineEdit(window, (0, 0))
         window.line_edit = 0, line_edit
-        line_edit.cursorEntered.connect(lambda: setattr(window, '__inputtin', [0, 0]))
         self.addWidget(line_edit)
 
 class EpsIntegral(QHBoxLayout):
@@ -82,22 +81,18 @@ class GridIntegralCalc(QGridLayout):
         local_histori = HistoriScroll()
         window.local_histori = local_histori
         self.addWidget(local_histori, 0, 0, 1, 6)
-        eps_line_edit = LineEdit(window)
+        eps_line_edit = LineEdit(window, (1, 0))
         window.line_edit = 1, eps_line_edit
-        eps_line_edit.cursorEntered.connect(lambda: setattr(window, 'inputtin', [1, 0]))
         self.addLayout(EpsIntegral(ButtonBase("EPS = ", css_name = "calculate", min_width = 92, max_width = 90, window = window), eps_line_edit), 1, 0, 1, 6)
         self.addWidget(ButtonBase("a = ", css_name = "calculate", max_width = 45, window = window), 2, 0, 1, 1)
-        a_line_edit = LineEdit(window)
+        a_line_edit = LineEdit(window, (1, 1))
         window.line_edit = 1, a_line_edit
-        a_line_edit.cursorEntered.connect(lambda: setattr(window, 'inputtin', [1, 1]))
         self.addWidget(a_line_edit, 2, 1, 1, 2)
         self.addWidget(ButtonBase("b = ", css_name = "calculate", max_width = 45, window = window), 2, 3, 1, 1)
-        b_line_edit = LineEdit(window)
-        window.line_edit = b_line_edit
-        b_line_edit.cursorEntered.connect(lambda: setattr(window, 'inputtin', [1, 2]))
+        b_line_edit = LineEdit(window, (1, 2))
+        window.line_edit = 1, b_line_edit
         self.addWidget(b_line_edit, 2, 4, 1, 2)
-        main_line_edit = LineEdit(window)
-        window.line_edit = main_line_edit
-        main_line_edit.cursorEntered.connect(lambda: setattr(window, 'inputtin', [1, 3]))
+        main_line_edit = LineEdit(window, (1, 3))
+        window.line_edit = 1, main_line_edit
         self.addWidget(main_line_edit, 3, 0, 1, 6)
         

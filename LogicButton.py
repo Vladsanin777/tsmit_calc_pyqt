@@ -1,4 +1,4 @@
-from Calculate import Calculate 
+from Calculate import Calculate, Integral 
 from NewHistoriElement import BoxHistoriElement
 class LogicCalculate():
     entry_text: str = ""
@@ -60,8 +60,20 @@ class LogicCalculate():
             
     def button_other(self) -> None:
         print(3)
-        self.window.result = (result := str(Calculate(self.line_edit_text)))
-        self.window.set_for_result.setText(result)
+        window = self.window
+        window.result = (
+            result := str(
+                Calculate(self.line_edit_text) 
+                if window.inputtin != (1, 3) else 
+                Integral(
+                    a = window.getResult(1, 1), 
+                    b = window.getResult(1, 2), 
+                    EPS = window.getResult(1, 0), 
+                    equation = self.line_edit_text
+                )
+            )
+        )
+        window.set_for_result.setText(result)
     
     @staticmethod
     def inputing_line_edit(button, window) -> None:

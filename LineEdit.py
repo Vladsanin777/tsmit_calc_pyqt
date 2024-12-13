@@ -5,8 +5,8 @@ from PyQt6.QtGui import QFocusEvent
 from LogicButton import LogicCalculate
 from UI import StyleButton, StyleLineEdit
 class LineEdit(QLineEdit):
-    cursorEntered = pyqtSignal()
-    def __init__(self, window):
+    __inputtin: tuple[int, int]
+    def __init__(self, window, inputtin: tuple[int, int]):
         super().__init__()
         self.window = window
         self.setSizePolicy(self.sizePolicy().Policy.Expanding, self.sizePolicy().Policy.Expanding)
@@ -17,9 +17,10 @@ class LineEdit(QLineEdit):
         self.setFont(font)
         self.setMaximumHeight(40)
         self.setContentsMargins(0, 0, 0, 0)
+        self.__inputtin = inputtin
     def focusInEvent(self, event: QFocusEvent):
             if event.reason():
-                self.cursorEntered.emit()  # Эмитируем сигнал, когда фокус установлен
+                self.window.inputtin = self.__inputtin
             super().focusInEvent(event)  # Вызываем стандартное поведение
 
     def on_entry_changed(self, text_line_edit):

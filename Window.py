@@ -44,7 +44,7 @@ class Window(QWidget):
     __resize_local_histori: list[HistoriWidget]
     __local_histori: list[HistoriScroll]
     __line_edit: list[list[LineEdit]]
-    __inputtin: list[int]
+    __inputtin: tuple[int, int]
     __result: list[list[str]]
     def __init__(self):
         
@@ -52,7 +52,7 @@ class Window(QWidget):
         self.__resize_local_histori = list()
         self.__local_histori = list()
         self.__line_edit = [[], []]
-        self.__inputtin = [0, 0]
+        self.__inputtin = 0, 0
         self.__result = [["0"], ["0", "0", "0", "0"]]
         super().__init__()
         self.setLayout(MainLayout(self))
@@ -135,11 +135,6 @@ class Window(QWidget):
     def line_edit(self) -> LineEdit:
         print(self.__line_edit)
         return self.__line_edit[self.__inputtin[0]][self.__inputtin[1]]
-    """
-    def line_edit(self, tab: int, element: int) -> LineEdit:
-        if isinstance(tab, int) and isinstance(element, int):
-            return self.__line_edit[tab][element]
-    """
     @line_edit.setter
     def line_edit(self, value: tuple[int, LineEdit]) -> None:
         if isinstance(value, tuple) and len(value) == 2 and \
@@ -151,4 +146,19 @@ class Window(QWidget):
         return self.__result[self.__inputtin[0]][self.__inputtin[1]]
     @result.setter
     def result(self, new_result) -> None:
-        self.__result[self.__inputtin[0]][self.__inputtin[1]] = new_result
+        if isinstance(new_result, str):
+            self.__result[self.__inputtin[0]][self.__inputtin[1]] = new_result
+        return
+    def getResult(self, tab: int, line_edit: int) -> str:
+        if isinstance(tab, int) and isinstance(line_edit, int):
+            return self.__result[tab][line_edit]
+    @property
+    def inputtin(self) -> tuple[int, int]:
+        return self.__inputtin
+    @inputtin.setter
+    def inputtin(self, value: tuple[int, int]) -> None:
+        print(value, 156)
+        if isinstance(value, tuple) and isinstance(value[0], int) and isinstance(value[1], int):
+            self.__inputtin = value
+        return
+

@@ -2,8 +2,34 @@ from math import *
 from decimal import Decimal
 from re import sub
 import traceback
+import threading
+from functools import wraps
+
+def threaded_class(cls):
+    """Декоратор для выполнения инициализации класса в отдельном потоке."""
+    class ThreadedClass:
+        def __init__(self, *args, **kwargs):
+            self._init_done = threading.Event()
+            self._thread = threading.Thread(target=self._initialize, args=(cls, args, kwargs), daemon=True)
+            self._thread.start()
+            self._init_done.wait()
+
+        def _initialize(self, cls, args, kwargs):
+            self._instance = cls(*args, **kwargs)
+            self._init_done.set()
+
+        def __getattr__(self, item):
+            return getattr(self._instance, item)
+
+        def join(self):
+            """Ожидание завершения потока."""
+            self._thread.join()
+        def __str__(self):
+            return str(self._instance)
+    return ThreadedClass
 
 
+@threaded_class
 class Calculate:
     result: str
     def __init__(self, expression):
@@ -36,6 +62,8 @@ class Calculate:
 
     def __str__(self):
         return self.result
+    def float(self):
+        return Decimal(self.result)
     
     def _find_nth_occurrence(self, string: str, substring: str, n: int) -> int:
         start = 0
@@ -61,7 +89,7 @@ class Calculate:
         Класс для обработки математических выражений: очистка, замена операторов и проверка скобок.
         """
         def __init__(self, expression: str):
-            expression = expression.replace("sqrt", "s").replace("ln", "n").replace("log", "l").replace("lg", "g").replace("**", "^").replace("mod", "m").replace(",", ".")
+            expression = expression.replace("sqrt", "q").replace("ln", "n").replace("log", "l").replace("lg", "g").replace("**", "^").replace("mod", "m").replace(",", ".").replace("sin", "s").replace("cos", "c").replace("tan", "t").replace("ctan", "n")
             # Удаление символов в конце строки
             expression = sub(r'[*/:+\-\^lmngs()]+$', '', expression)
             self.expression = expression
@@ -90,7 +118,7 @@ class Calculate:
             return self.expression
 
         class BracketsError(Exception): ...
-
+    @threaded_class
     class SimpleExpressionCalculation:
 
         # Разбиение строки на отдельные элементы (числа и операторы)
@@ -259,6 +287,7 @@ class Calculate:
                     print(890)
 
             return self._calculate_expression_base(tokens)
+        @threaded_class
         class FloatDecimal:
             def __init__(self, number: str):
                 print(number)
@@ -298,4 +327,59 @@ class Calculate:
                 print(str(self.value), 657)
                 return str(self.value)
 
-    
+@threaded_class
+class Diff():
+    def __init__(self, equation: str):
+        Calculate
+
+
+
+
+@threaded_class
+class Integral():
+    __a:          Decimal
+    __b:          Decimal
+    __n:          int
+    __EPS:        Decimal
+    __result:     Decimal
+    __equation:   str
+    __new_result: Decimal
+    def __init__(self, *, a: str, b: str, EPS: str, equation: str):
+        self.__n =          2
+        self.__a =          Decimal(a)
+        self.__b =          Decimal(b)
+        self.__EPS =        Decimal(EPS)
+        self.__equation =   equation
+        self.__result = Decimal(0)
+        self.integral()
+        while (abs(self.__result - self.__new_result) >= self.__EPS):
+            print(self.__result, self.__new_result)
+            self.__n **=    2
+            self.__result = self.__new_result
+            self.integral()
+            print(abs(self.__result - self.__new_result))
+    def integral(self):
+        
+        # Grid spacing
+        h: Decimal = (self.__b - self.__a) / Decimal(self.__n)
+
+        
+        # Computing sum of first and last terms
+        # in above formula
+        s: Decimal = (
+            Calculate(self.__equation.replace('x', str(self.__a))).float() + 
+            Calculate(self.__equation.replace('x', str(self.__b))).float()
+        )
+
+        # Adding middle terms in above formula
+        i: Decimal = Decimal(1)
+        h_i: Decimal = Decimal(1)
+        while i < self.__n:
+            s += Decimal(2) * Calculate(self.__equation.replace('x', str(self.__a + i * h))).float()
+            i += h_i
+            
+        # h/2 indicates (b-a)/2n. 
+        # Multiplying h/2 with s.
+        self.__new_result = h / Decimal(2) * s
+    def __str__(self):
+        return str(self.__new_result)
