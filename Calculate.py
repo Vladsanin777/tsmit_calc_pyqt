@@ -4,17 +4,18 @@ from re import sub
 import traceback
 import threading
 from functools import wraps
+from typing import Self, Any
 
 def threaded_class(cls):
     """Декоратор для выполнения инициализации класса в отдельном потоке."""
     class ThreadedClass:
-        def __init__(self, *args, **kwargs):
+        def __init__(self: Self, *args, **kwargs):
             self._init_done = threading.Event()
             self._thread = threading.Thread(target=self._initialize, args=(cls, args, kwargs), daemon=True)
             self._thread.start()
             self._init_done.wait()
 
-        def _initialize(self, cls, args, kwargs):
+        def _initialize(self: Self, cls, args, kwargs):
             self._instance = cls(*args, **kwargs)
             self._init_done.set()
 
@@ -29,7 +30,6 @@ def threaded_class(cls):
     return ThreadedClass
 
 
-@threaded_class
 class Calculate:
     result: str
     def __init__(self, expression):
@@ -328,10 +328,73 @@ class Calculate:
                 return str(self.value)
 
 @threaded_class
-class Diff():
-    def __init__(self, equation: str):
-        Calculate
+class Derivative(Calculate):
+    def __init__(self: Self, expression: str):
+        expression = expression.replace(" ", "")
+        if expression == "": self.result = "0"
+        else:
+            try:
+                expression = str(self.Debuger(expression))
+                self.result = "0"
+                print(list(self.SimpleExpressionDerivative(expression).delete_brackets()))
+            except Exception as e:
+                print(e)
+                traceback.print_exc()
+                self.result = "Error"
+    @threaded_class
+    class SimpleExpressionDerivative():
+        result: list[str]
+        # Разбиение строки на отдельные элементы (числа и операторы)
+        def __init__(self: Self, expression: str):
 
+
+            # sheach first digit
+            hex_i: int = expression[1]=='x' if len(expression) > 1 else False
+            positions: list[int] = list() 
+            for element_i in range(len(expression)):
+                if "%!-+*/:^sngolm|()".find(expression[element_i]) != -1 and not ("-+".find(expression[element_i]) and "Ee".find(expression[element_i-1]) != -1 and not hex_i):
+                    positions.append(element_i)
+                    hex_i = expression[element_i+2] == 'x' if len(expression) > element_i+3 else False
+
+
+                    
+            print(positions, 78)
+            result_list = list()
+            while positions != []:
+                print(positions, 77)
+                # wrating first digit in result list
+                if (element := expression[(number_operators := positions.pop())+1:]) != "": result_list.append(element)
+                # wrating operator in result list
+                result_list.append(expression[number_operators])
+                print(result_list, 76)
+                # trimming string expression
+                expression = expression[:number_operators]
+                print(expression, 75)
+            if result_list == []:
+                print(89)
+                if expression: result_list = [expression]
+            else:
+                if expression: result_list.append(expression)
+                result_list = result_list[::-1]
+            print(result_list, 34)
+            self.result = result_list
+            print(self.result, 13)
+        def __iter__(self):
+            return iter(self.result)
+        def delete_brackets(self) -> Self:
+            while "(" in self.result:
+                index_open_bracket = max(index for index in range(len(self.result)) if self.result[index] == '(')
+                index_close_bracket: str
+                for index_close_bracket in \
+                        [index for index in range(len(self.result)) if self.result[index] == ')']:
+                    if index_open_bracket < index_close_bracket:
+                        break
+                self.result.pop(index_open_bracket)
+                sub_result: list[str] = list()
+                for _ in range(index_close_bracket - index_open_bracket - 1):
+                    sub_result.append(self.result.pop(index_open_bracket))
+                self.result[index_open_bracket] = sub_result
+            return self
 
 
 
@@ -345,6 +408,10 @@ class Integral():
     __equation:   str
     __new_result: Decimal
     def __init__(self, *, a: str, b: str, EPS: str, equation: str):
+        Derivative(equation)
+    def __str__(self):
+        return "0"
+    """
         self.__n =          2
         self.__a =          Decimal(a)
         self.__b =          Decimal(b)
@@ -383,3 +450,4 @@ class Integral():
         self.__new_result = h / Decimal(2) * s
     def __str__(self):
         return str(self.__new_result)
+    """
