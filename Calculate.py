@@ -89,7 +89,19 @@ class Calculate:
         Класс для обработки математических выражений: очистка, замена операторов и проверка скобок.
         """
         def __init__(self, expression: str):
-            expression = expression.replace("sqrt", "q").replace("ln", "n").replace("log", "l").replace("lg", "g").replace("**", "^").replace("mod", "m").replace(",", ".").replace("sin", "s").replace("cos", "c").replace("tan", "t").replace("ctan", "n")
+            if "^*" in expression:
+                raise Exception("Two operators in expression \"^*\"")
+            if "*^" in expression:
+                raise Exception("Two operators in expression \"*^\"")
+
+            expression = expression.replace("sqrt", "q").replace("ln", "n").replace("log", "l").replace("lg", "g").replace("**", "^").replace("mod", "m").replace(",", ".").replace("sin", "s").replace("cos", "c").replace("tan", "t").replace("ctan", "n").replace("//", "/").replace("--", "+")
+            while "++" in expression:
+                expression = expression.replace("++", "+")
+            while "//" in expression:
+                expression = expression.replace("//", "/")
+            while "^^" in expression:
+                expression = expression.replace("^^", "^")
+            expression = expression.replace("^*", "^")
             # Удаление символов в конце строки
             expression = sub(r'[*/:+\-\^lmngs()]+$', '', expression)
             self.expression = expression
@@ -360,10 +372,24 @@ class Derivative(Calculate):
                     
             print(positions, 78)
             result_list = list()
+            index_old: int = -2
+            delete_positions: int = 0
+            for index in range(len(positions)):
+                index -= delete_positions
+                print(index)
+                if index_old + 1 == positions[index] and expression[positions[index]] != "(":
+                    print(positions.pop(index), 90)
+                    delete_positions += 1
+                else:
+                    index_old = positions[index]
+
+
+            print(positions)
             while positions != []:
                 print(positions, 77)
                 # wrating first digit in result list
-                if (element := expression[(number_operators := positions.pop())+1:]) != "": result_list.append(element)
+                if (element := expression[(number_operators := positions.pop())+1:]) != "": 
+                    result_list.append(element)
                 # wrating operator in result list
                 result_list.append(expression[number_operators])
                 print(result_list, 76)
@@ -390,11 +416,22 @@ class Derivative(Calculate):
                     if index_open_bracket < index_close_bracket:
                         break
                 self.result.pop(index_open_bracket)
+                if self.result[index_open_bracket-1][0] in "0123456789":
+                    self.result.insert(index_open_bracket, "*")
+                    index_open_bracket += 1
+                    index_close_bracket += 1
                 sub_result: list[str] = list()
                 for _ in range(index_close_bracket - index_open_bracket - 1):
                     sub_result.append(self.result.pop(index_open_bracket))
                 self.result[index_open_bracket] = sub_result
+                index_open_bracket += 1
+                if len(self.result) > index_open_bracket:
+                    if self.result[index_open_bracket][0] in "0123456789":
+                        self.result.insert(index_open_bracket, "*")
+
             return self
+        def adding_multiplication(self: Self) -> Self:
+            ...
 
 
 
