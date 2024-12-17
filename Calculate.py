@@ -6,6 +6,55 @@ import threading
 from functools import wraps
 from typing import Self, Any
 
+class Debuger:
+        """
+        Класс для обработки математических выражений: очистка, замена операторов и проверка скобок.
+        """
+        def __init__(self, expression: str):
+            if "^*" in expression:
+                raise Exception("Two operators in expression \"^*\"")
+            if "*^" in expression:
+                raise Exception("Two operators in expression \"*^\"")
+
+            expression = expression.replace("**", "^").replace(":", "/").replace(",", ".").replace("//", "/").replace("--", "+")
+            while "++" in expression:
+                expression = expression.replace("++", "+")
+            while "//" in expression:
+                expression = expression.replace("//", "/")
+            while "^^" in expression:
+                expression = expression.replace("^^", "^")
+            expression = expression.replace("^*", "^")
+            # Удаление символов в конце строки
+            expression = sub(r'[*/:+\-\^()]+$', '', expression)
+            self.expression = expression
+            # Добавление недостающих закрывающих скобок
+            self.expression += ")" * self.verification_brackets()
+
+        def verification_brackets(self) -> int:
+            """
+            Проверяет баланс скобок в выражении. Возвращает количество недостающих закрывающих скобок.
+            Выбрасывает BracketsError, если баланс нарушен (лишние закрывающие скобки).
+            """
+            bracket = 0
+            for symbol in self.expression:
+                if symbol == "(":
+                    bracket += 1
+                elif symbol == ")":
+                    bracket -= 1
+                if bracket < 0:
+                    raise self.BracketsError("verification_brackets")
+            return bracket
+
+        def __str__(self) -> str:
+            """
+            Возвращает обработанное выражение.
+            """
+            return self.expression
+
+        class BracketsError(Exception): ...
+
+
+
 
 class SimpleExpression():
     result: list[str]
@@ -17,7 +66,7 @@ class SimpleExpression():
         hex_i: int = expression[1]=='x' if len(expression) > 1 else False
         positions: list[int] = list() 
         for element_i in range(len(expression)):
-            if "%!-+*/:^sngolm|()".find(expression[element_i]) != -1 and not ("-+".find(expression[element_i]) and "Ee".find(expression[element_i-1]) != -1 and not hex_i):
+            if "%!-+*/:^|()sincoetanqrlg".find(expression[element_i]) != -1 and not ("-+".find(expression[element_i]) and "Ee".find(expression[element_i-1]) != -1 and not hex_i):
                 positions.append(element_i)
                 hex_i = expression[element_i+2] == 'x' if len(expression) > element_i+3 else False
 
@@ -55,6 +104,17 @@ class SimpleExpression():
         else:
             if expression: result_list.append(expression)
             result_list = result_list[::-1]
+        print(result_list, 33)
+        for func in [['sin', ['s', 'i', 'n']], ['cos', ['c', 'o', 's']], ['tan', ['t', 'a', 'n']], ['cot', ['c', 'o', 't']], ['sec', ['s', 'e', 'c']], ['csc', ['c', 's', 'c']]]:
+            
+            while func[1] in result_list:
+                index = result_list.index(func[1])  # Найти подсписок
+                result_list[index] = func[0]       # Заменить подсписок на строку
+
+            # Проверяем наличие строки последовательных символов
+            for i in range(len(result_list) - len(func[1]) + 1):
+                if result_list[i:i + len(func[1])] == func[1]:  # Если срез совпадает
+                    result_list[i:i + len(func[1])] = [func[0]]  # Заменить на строку
         print(result_list, 34)
         self.result = result_list
         self.delete_brackets()
@@ -73,7 +133,7 @@ class SimpleExpression():
                 if index_open_bracket < index_close_bracket:
                     break
             self.result.pop(index_open_bracket)
-            if self.result[index_open_bracket-1][0] in "0123456789":
+            if index_open_bracket != 0 and self.result[index_open_bracket-1][0] in "0123456789":
                 self.result.insert(index_open_bracket, "*")
                 index_open_bracket += 1
                 index_close_bracket += 1
@@ -85,16 +145,26 @@ class SimpleExpression():
             if len(self.result) > index_open_bracket:
                 if self.result[index_open_bracket][0] in "0123456789":
                     self.result.insert(index_open_bracket, "*")
+        while len(self.result) == 1 and isinstance(self.result[0], list):
+            self.result = self.result[0]
     def add_lists(self: Self, equality) -> None:
         index_priority_operator: int = 0
+        priority_operator_func = lambda lst, x: len(lst) - 1 - lst[::-1].index(x)
+        if "^" in equality:
+            index_priority_operator = priority_operator_func(equality, "^")
+        if "*" in equality:
+            index_priority_operator = priority_operator_func(equality, "*")
+        if "/" in equality:
+            if index_priority_operator and index_priority_operator < equality.index("/"):
+                index_priority_operator = priority_operator_func(equality, "/")
         if "+" in equality:
-            index_priority_operator = equality.index("+")
+            index_priority_operator = priority_operator_func(equality, "+")
         if "-" in equality:
-            if index_priority_operator and index_priority_operator > equality.index("-"):
-                index_priority_operator = equality.index("-")
+            if index_priority_operator and index_priority_operator < equality.index("-"):
+                index_priority_operator = priority_operator_func(equality, "-")
         if index_priority_operator:
-            first_part = self.add_lists(t) if len(t := equality[:index_priority_operator]) > 1 else t
-            last_part = self.add_lists(equality[index_priority_operator+1:])
+            first_part = self.add_lists(t) if len(t := equality[:index_priority_operator]) > 1 else t[0]
+            last_part = self.add_lists(t) if len(t := equality[index_priority_operator+1:]) > 1 else t[0]
             operator = equality[index_priority_operator]
             equality.clear()
             equality.append(first_part)
@@ -193,7 +263,7 @@ class Calculate:
             if "*^" in expression:
                 raise Exception("Two operators in expression \"*^\"")
 
-            expression = expression.replace("sqrt", "q").replace("ln", "n").replace("log", "l").replace("lg", "g").replace("**", "^").replace("mod", "m").replace(":", "/").replace(",", ".").replace("sin", "s").replace("si", "s").replace("cos", "c").replace("co", "c").replace("ctan", "n").replace("cta", "n").replace("ct", "n").replace("tan", "t").replace("ta", "t").replace("//", "/").replace("--", "+")
+            expression = expression.replace("**", "^").replace(":", "/").replace(",", ".").replace("//", "/").replace("--", "+")
             while "++" in expression:
                 expression = expression.replace("++", "+")
             while "//" in expression:
@@ -442,38 +512,65 @@ class Calculate:
 class Derivative(Calculate):
     result: str
     expression: list[Any] 
-    def __init__(self: Self, expression: str):
+    diff: list[Any]
+    def __init__(self: Self, expression: str) -> Self:
         expression = expression.replace(" ", "")
         if expression == "": self.result = "0"
         else:
             try:
-                expression = str(self.Debuger(expression))
+                expression = str(Debuger(expression))
                 self.expression = list(SimpleExpression(expression))
+                self.diff = self.ordinar_derivate(self.expression)
+                print(self.diff)
             except Exception as e:
                 print(e)
                 traceback.print_exc()
                 self.result = "Error"
     def ordinar_derivate(self: Self, expression: list[Any]):
-        index_priority: int = None
-        if "+" in self.expression:
-            if (index_t := self.expression.index("+")) < index_priority or index_priority is None:
-                index_priority = index_t
-        if "-" in self.expression:
-            if (index_t := self.expression.index("-")) < index_priority or index_priority is None:
-                index_priority = index_t
-        if "*" in self.expression:
-            if (index_t := self.expression.index("*")) < index_priority or index_priority is None:
-                index_priority = index_t
-        if ":" in self.expression:
-            if (index_t := self.expression.index(":")) < index_priority or index_priority is None:
-                index_priority = index_t
-        """
-        operator = self.expression[index_priority]
-        if index_priority == 1 and len(self.expression) == 3:
-            match operator:
-                case "*":
-                    if 
-        """
+        match len(expression):
+            case 1:
+                expression[0] = '0' if expression[0][0] in "0123456789" else '1'
+            case 2:
+                if expression[1][0] in "0123456789":
+                    expression = '0'
+                else:
+                    expression_1: [str | list] = expression[1]
+                    complex_expression: bool = isinstance(expression_1, list)
+                    raising_to_a_power: bool = False
+                    sec_or_csc: bool = False
+                    is_minus: bool = expression[0][0] == '-'
+                    match expression[0][-3:]:
+                        case 'sin':
+                            expression = '-cos' if is_minus else 'cos'
+                        case 'cos':
+                            expression = 'sin' if is_minus else '-sin'
+                        case 'tan':
+                            expression = '-sec' if is_minus else 'sec'
+                            raising_to_a_power = True
+                        case 'cot':
+                            expression = 'csc' if is_minus else '-csc'
+                            raising_to_a_power = True
+                        case 'sec': 
+                            expression = [['-sec' if is_minus else 'sec', expression_1], '*', ['tan', expression_1]]
+                            sec_or_csc = True
+                        case 'csc':
+                            expression = [['csc' if is_minus else '-csc', expression_1], '*', ['cot', expression_1]]
+                            sec_or_csc = True
+                    if not sec_or_csc:
+                        expression = [expression, expression_1]
+                        if raising_to_a_power:
+                            expression = [expression, '^', '2']
+                    if complex_expression:
+                        expression = [expression, '*', self.ordinar_derivate(expression_1)]
+
+            case 3:
+                pass
+
+        return expression
+
+
+
+
             
         
                 
