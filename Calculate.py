@@ -6,6 +6,105 @@ import threading
 from functools import wraps
 from typing import Self, Any
 
+
+class SimpleExpression():
+    result: list[str]
+    # Разбиение строки на отдельные элементы (числа и операторы)
+    def __init__(self: Self, expression: str):
+
+
+        # sheach first digit
+        hex_i: int = expression[1]=='x' if len(expression) > 1 else False
+        positions: list[int] = list() 
+        for element_i in range(len(expression)):
+            if "%!-+*/:^sngolm|()".find(expression[element_i]) != -1 and not ("-+".find(expression[element_i]) and "Ee".find(expression[element_i-1]) != -1 and not hex_i):
+                positions.append(element_i)
+                hex_i = expression[element_i+2] == 'x' if len(expression) > element_i+3 else False
+
+
+                
+        print(positions, 78)
+        result_list = list()
+        index_old: int = -2
+        delete_positions: int = 0
+        for index in range(len(positions)):
+            index -= delete_positions
+            print(index)
+            if index_old + 1 == positions[index] and expression[positions[index]] in ")":
+                print(positions.pop(index), 90)
+                delete_positions += 1
+            else:
+                index_old = positions[index]
+
+
+        print(positions)
+        while positions != []:
+            print(positions, 77)
+            # wrating first digit in result list
+            if (element := expression[(number_operators := positions.pop())+1:]) != "": 
+                result_list.append(element)
+            # wrating operator in result list
+            result_list.append(expression[number_operators])
+            print(result_list, 76)
+            # trimming string expression
+            expression = expression[:number_operators]
+            print(expression, 75)
+        if result_list == []:
+            print(89)
+            if expression: result_list = [expression]
+        else:
+            if expression: result_list.append(expression)
+            result_list = result_list[::-1]
+        print(result_list, 34)
+        self.result = result_list
+        self.delete_brackets()
+        self.result = self.add_lists(self.result)
+        print(self.result, 13)
+    def __iter__(self):
+        return iter(self.result)
+    def delete_brackets(self: Self) -> None:
+        print(self.result, 579)
+        while "(" in self.result:
+            print(89)
+            index_open_bracket = max(index for index in range(len(self.result)) if self.result[index] == '(')
+            index_close_bracket: str
+            for index_close_bracket in \
+                    [index for index in range(len(self.result)) if self.result[index] == ')']:
+                if index_open_bracket < index_close_bracket:
+                    break
+            self.result.pop(index_open_bracket)
+            if self.result[index_open_bracket-1][0] in "0123456789":
+                self.result.insert(index_open_bracket, "*")
+                index_open_bracket += 1
+                index_close_bracket += 1
+            sub_result: list[str] = list()
+            for _ in range(index_close_bracket - index_open_bracket - 1):
+                sub_result.append(self.result.pop(index_open_bracket))
+            self.result[index_open_bracket] = sub_result[0] if len(sub_result) == 1 else sub_result
+            index_open_bracket += 1
+            if len(self.result) > index_open_bracket:
+                if self.result[index_open_bracket][0] in "0123456789":
+                    self.result.insert(index_open_bracket, "*")
+    def add_lists(self: Self, equality) -> None:
+        index_priority_operator: int = 0
+        if "+" in equality:
+            index_priority_operator = equality.index("+")
+        if "-" in equality:
+            if index_priority_operator and index_priority_operator > equality.index("-"):
+                index_priority_operator = equality.index("-")
+        if index_priority_operator:
+            first_part = self.add_lists(t) if len(t := equality[:index_priority_operator]) > 1 else t
+            last_part = self.add_lists(equality[index_priority_operator+1:])
+            operator = equality[index_priority_operator]
+            equality.clear()
+            equality.append(first_part)
+            equality.append(operator)
+            equality.append(last_part)
+        return equality
+
+
+
+
 def threaded_class(cls):
     """Декоратор для выполнения инициализации класса в отдельном потоке."""
     class ThreadedClass:
@@ -94,7 +193,7 @@ class Calculate:
             if "*^" in expression:
                 raise Exception("Two operators in expression \"*^\"")
 
-            expression = expression.replace("sqrt", "q").replace("ln", "n").replace("log", "l").replace("lg", "g").replace("**", "^").replace("mod", "m").replace(",", ".").replace("sin", "s").replace("cos", "c").replace("tan", "t").replace("ctan", "n").replace("//", "/").replace("--", "+")
+            expression = expression.replace("sqrt", "q").replace("ln", "n").replace("log", "l").replace("lg", "g").replace("**", "^").replace("mod", "m").replace(":", "/").replace(",", ".").replace("sin", "s").replace("si", "s").replace("cos", "c").replace("co", "c").replace("ctan", "n").replace("cta", "n").replace("ct", "n").replace("tan", "t").replace("ta", "t").replace("//", "/").replace("--", "+")
             while "++" in expression:
                 expression = expression.replace("++", "+")
             while "//" in expression:
@@ -341,98 +440,43 @@ class Calculate:
 
 @threaded_class
 class Derivative(Calculate):
+    result: str
+    expression: list[Any] 
     def __init__(self: Self, expression: str):
         expression = expression.replace(" ", "")
         if expression == "": self.result = "0"
         else:
             try:
                 expression = str(self.Debuger(expression))
-                self.result = "0"
-                print(list(self.SimpleExpressionDerivative(expression).delete_brackets()))
+                self.expression = list(SimpleExpression(expression))
             except Exception as e:
                 print(e)
                 traceback.print_exc()
                 self.result = "Error"
-    @threaded_class
-    class SimpleExpressionDerivative():
-        result: list[str]
-        # Разбиение строки на отдельные элементы (числа и операторы)
-        def __init__(self: Self, expression: str):
-
-
-            # sheach first digit
-            hex_i: int = expression[1]=='x' if len(expression) > 1 else False
-            positions: list[int] = list() 
-            for element_i in range(len(expression)):
-                if "%!-+*/:^sngolm|()".find(expression[element_i]) != -1 and not ("-+".find(expression[element_i]) and "Ee".find(expression[element_i-1]) != -1 and not hex_i):
-                    positions.append(element_i)
-                    hex_i = expression[element_i+2] == 'x' if len(expression) > element_i+3 else False
-
-
-                    
-            print(positions, 78)
-            result_list = list()
-            index_old: int = -2
-            delete_positions: int = 0
-            for index in range(len(positions)):
-                index -= delete_positions
-                print(index)
-                if index_old + 1 == positions[index] and expression[positions[index]] != "(":
-                    print(positions.pop(index), 90)
-                    delete_positions += 1
-                else:
-                    index_old = positions[index]
-
-
-            print(positions)
-            while positions != []:
-                print(positions, 77)
-                # wrating first digit in result list
-                if (element := expression[(number_operators := positions.pop())+1:]) != "": 
-                    result_list.append(element)
-                # wrating operator in result list
-                result_list.append(expression[number_operators])
-                print(result_list, 76)
-                # trimming string expression
-                expression = expression[:number_operators]
-                print(expression, 75)
-            if result_list == []:
-                print(89)
-                if expression: result_list = [expression]
-            else:
-                if expression: result_list.append(expression)
-                result_list = result_list[::-1]
-            print(result_list, 34)
-            self.result = result_list
-            print(self.result, 13)
-        def __iter__(self):
-            return iter(self.result)
-        def delete_brackets(self) -> Self:
-            while "(" in self.result:
-                index_open_bracket = max(index for index in range(len(self.result)) if self.result[index] == '(')
-                index_close_bracket: str
-                for index_close_bracket in \
-                        [index for index in range(len(self.result)) if self.result[index] == ')']:
-                    if index_open_bracket < index_close_bracket:
-                        break
-                self.result.pop(index_open_bracket)
-                if self.result[index_open_bracket-1][0] in "0123456789":
-                    self.result.insert(index_open_bracket, "*")
-                    index_open_bracket += 1
-                    index_close_bracket += 1
-                sub_result: list[str] = list()
-                for _ in range(index_close_bracket - index_open_bracket - 1):
-                    sub_result.append(self.result.pop(index_open_bracket))
-                self.result[index_open_bracket] = sub_result
-                index_open_bracket += 1
-                if len(self.result) > index_open_bracket:
-                    if self.result[index_open_bracket][0] in "0123456789":
-                        self.result.insert(index_open_bracket, "*")
-
-            return self
-        def adding_multiplication(self: Self) -> Self:
-            ...
-
+    def ordinar_derivate(self: Self, expression: list[Any]):
+        index_priority: int = None
+        if "+" in self.expression:
+            if (index_t := self.expression.index("+")) < index_priority or index_priority is None:
+                index_priority = index_t
+        if "-" in self.expression:
+            if (index_t := self.expression.index("-")) < index_priority or index_priority is None:
+                index_priority = index_t
+        if "*" in self.expression:
+            if (index_t := self.expression.index("*")) < index_priority or index_priority is None:
+                index_priority = index_t
+        if ":" in self.expression:
+            if (index_t := self.expression.index(":")) < index_priority or index_priority is None:
+                index_priority = index_t
+        """
+        operator = self.expression[index_priority]
+        if index_priority == 1 and len(self.expression) == 3:
+            match operator:
+                case "*":
+                    if 
+        """
+            
+        
+                
 
 
 @threaded_class
