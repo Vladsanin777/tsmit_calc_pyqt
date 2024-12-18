@@ -65,10 +65,13 @@ class SimpleExpression():
         # sheach first digit
         hex_i: int = expression[1]=='x' if len(expression) > 1 else False
         positions: list[int] = list() 
+        last_element: int = 0
         for element_i in range(len(expression)):
             if "%!-+*/:^|()sincoetanqrlg".find(expression[element_i]) != -1 and not ("-+".find(expression[element_i]) and "Ee".find(expression[element_i-1]) != -1 and not hex_i):
-                positions.append(element_i)
                 hex_i = expression[element_i+2] == 'x' if len(expression) > element_i+3 else False
+                if last_element != element_i:
+                    positions.append(element_i)
+                last_element = element_i + 1
 
 
                 
@@ -105,7 +108,14 @@ class SimpleExpression():
             if expression: result_list.append(expression)
             result_list = result_list[::-1]
         print(result_list, 33)
-        for func in [['sin', ['s', 'i', 'n']], ['cos', ['c', 'o', 's']], ['tan', ['t', 'a', 'n']], ['cot', ['c', 'o', 't']], ['sec', ['s', 'e', 'c']], ['csc', ['c', 's', 'c']]]:
+        for func in [
+                ['sin', ['s', 'i', 'n']], 
+                ['cos', ['c', 'o', 's']], 
+                ['tan', ['t', 'a', 'n']], 
+                ['cot', ['c', 'o', 't']], 
+                ['sec', ['s', 'e', 'c']], 
+                ['csc', ['c', 's', 'c']]
+        ]:
             
             while func[1] in result_list:
                 index = result_list.index(func[1])  # Найти подсписок
@@ -114,7 +124,16 @@ class SimpleExpression():
             # Проверяем наличие строки последовательных символов
             for i in range(len(result_list) - len(func[1]) + 1):
                 if result_list[i:i + len(func[1])] == func[1]:  # Если срез совпадает
-                    result_list[i:i + len(func[1])] = [func[0]]  # Заменить на строку
+                    result_list[i:i + len(func[1])] = [func[0]]
+                    """
+                    if len(result_list) > i+2:
+                        if result_list[i + 1] != '(':
+                            result_list.insert(i+1, '(')
+                            if len(result_list) > i+4:
+                                result_list.insert(i+3, ')')
+                            else:
+                                result_list.append(')')
+                    """
         print(result_list, 34)
         self.result = result_list
         self.delete_brackets()
@@ -150,18 +169,26 @@ class SimpleExpression():
     def add_lists(self: Self, equality) -> None:
         index_priority_operator: int = 0
         priority_operator_func = lambda lst, x: len(lst) - 1 - lst[::-1].index(x)
+        if "sin" in equality:
+            index_priority_operator = priority_operator_func(equality, "sin")
         if "^" in equality:
             index_priority_operator = priority_operator_func(equality, "^")
-        if "*" in equality:
+        if "*" in equality and "/" in equality:
             index_priority_operator = priority_operator_func(equality, "*")
-        if "/" in equality:
-            if index_priority_operator and index_priority_operator < equality.index("/"):
-                index_priority_operator = priority_operator_func(equality, "/")
-        if "+" in equality:
+            if index_priority_operator and index_priority_operator < (t := priority_operator_func(equality, "-")):
+                index_priority_operator = t
+        elif "*" in equality:
+            index_priority_operator = priority_operator_func(equality, "*")
+        elif "/" in equality:
+            index_priority_operator = priority_operator_func(equality, "/")
+        if "+" in equality and "-" in equality:
             index_priority_operator = priority_operator_func(equality, "+")
-        if "-" in equality:
-            if index_priority_operator and index_priority_operator < equality.index("-"):
-                index_priority_operator = priority_operator_func(equality, "-")
+            if index_priority_operator and index_priority_operator < (t := priority_operator_func(equality, "-")):
+                index_priority_operator = t
+        elif "+" in equality:
+            index_priority_operator = priority_operator_func(equality, "+")
+        elif "-" in equality:
+            index_priority_operator = priority_operator_func(equality, "-")
         if index_priority_operator:
             first_part = self.add_lists(t) if len(t := equality[:index_priority_operator]) > 1 else t[0]
             last_part = self.add_lists(t) if len(t := equality[index_priority_operator+1:]) > 1 else t[0]
@@ -513,14 +540,16 @@ class Derivative(Calculate):
     result: str
     expression: list[Any] 
     diff: list[Any]
-    def __init__(self: Self, expression: str) -> Self:
+    def __init__(self: Self, expression: str, reverse_derivate: bool = False) -> Self:
+        print("reverse_derivate", reverse_derivate)
         expression = expression.replace(" ", "")
         if expression == "": self.result = "0"
         else:
             try:
                 expression = str(Debuger(expression))
                 self.expression = list(SimpleExpression(expression))
-                self.diff = self.ordinar_derivate(self.expression)
+                derivate = self.reverse_derivate if reverse_derivate else self.ordinar_derivate
+                self.diff = derivate(self.expression)
                 print(self.diff)
             except Exception as e:
                 print(e)
@@ -529,7 +558,11 @@ class Derivative(Calculate):
     def ordinar_derivate(self: Self, expression: list[Any]):
         match len(expression):
             case 1:
-                expression[0] = '0' if expression[0][0] in "0123456789" else '1'
+                print(expression)
+                if len(expression[0]) == 1:
+                    expression = '0' if expression[0][0] in "0123456789" else '1'
+                else: 
+                    expression = '0' if expression[0][1] in "0123456789" else '1'
             case 2:
                 if expression[1][0] in "0123456789":
                     expression = '0'
@@ -564,10 +597,155 @@ class Derivative(Calculate):
                         expression = [expression, '*', self.ordinar_derivate(expression_1)]
 
             case 3:
-                pass
+                expression_0: [str | list] = expression[0]
+                expression_2: [str | list] = expression[2]
+                match expression[1]:
+                    case "+" | "-":
+                        expression = [
+                                self.ordinar_derivate(expression_0), 
+                                expression[1], 
+                                self.ordinar_derivate(expression_2)
+                        ]
+                    case "*":
+                        expression = [
+                            [
+                                self.ordinar_derivate(expression_0), 
+                                '*',
+                                expression_2
+                            ], 
+                            '+', 
+                            [
+                                expression_0, 
+                                '*', 
+                                self.ordinar_derivate(expression_2)
+                            ]
+                        ]
+                    case "/":
+                        expression = [
+                            [
+                                [
+                                    self.ordinar_derivate(expression_0), 
+                                    '*',
+                                    expression_2
+                                ], 
+                                '+', 
+                                [
+                                    expression_0, 
+                                    '*', 
+                                    self.ordinar_derivate(expression_2)
+                                ]
+                            ],
+                            '/',
+                            [
+                                expression_2,
+                                '^',
+                                '2'
+                            ]
+                        ]
+                    case "^":
+                        expression = [
+                            [
+                                expression_2,
+                                '*',
+                                [
+                                    expression_0,
+                                    '^',
+                                    str(Decimal(expression_2) - Decimal(1))
+                                ]
+                            ],
+                            '*',
+                            self.ordinar_derivate(expression_0)
+                        ]
+                        
 
         return expression
 
+    def reverse_derivate(self: Self, expression: [list | str]):
+        match len(expression):
+            case 1:
+                print(19)
+                # Константа или переменная
+                if len(expression[0]) == 1:
+                    if expression[0][0] in "0123456789":
+                        expression = [expression[0], "*", "x"]  # C -> C*x
+                    else:
+                        expression = [["x", "^", "2"], "/", "2"]  # x -> x^2/2
+                else:
+                    expression = ["x"] if expression[0][1] in "0123456789" else [expression[0], "*", "x"]
+
+            case 2:
+                expression_1: [str | list] = expression[1]
+                is_minus: bool = expression[0][0] == '-'
+                match expression[0][-3:]:
+                    case 'sin':
+                        expression = ['-cos' if is_minus else 'cos', expression_1]
+                    case 'cos':
+                        expression = ['sin' if is_minus else '-sin', expression_1]
+                    case 'tan':
+                        expression = ['-ln|cos' if is_minus else 'ln|cos', expression_1]
+                    case 'cot':
+                        expression = ['ln|sin' if is_minus else '-ln|sin', expression_1]
+                    case 'sec':
+                        expression = ['ln|sec+tan' if is_minus else '-ln|sec+tan', expression_1]
+                    case 'csc':
+                        expression = ['-ln|csc+cot' if is_minus else 'ln|csc+cot', expression_1]
+                    case _:
+                        if isinstance(expression_1, list):
+                            expression = [
+                                self.reverse_derivate(expression_1), "*", "x"
+                            ]
+                        else:
+                            expression = [expression[1], "*", "x"]
+
+            case 3:
+                expression_0: [str | list] = expression[0]
+                expression_2: [str | list] = expression[2]
+                match expression[1]:
+                    case "+" | "-":
+                        expression = [
+                            self.reverse_derivate(expression_0),
+                            expression[1],
+                            self.reverse_derivate(expression_2)
+                        ]
+                    case "*":
+                        # Интеграл произведения
+                        if isinstance(expression_0, str) and expression_0.isdigit():
+                            expression = [
+                                expression_0,
+                                "*",
+                                self.reverse_derivate(expression_2)
+                            ]
+                        elif isinstance(expression_2, str) and expression_2.isdigit():
+                            expression = [
+                                expression_2,
+                                "*",
+                                self.reverse_derivate(expression_0)
+                            ]
+                        else:
+                            raise NotImplementedError("Integration by parts is required.")
+                    case "/":
+                        # Интеграл частного (замена переменной для линейных функций)
+                        if isinstance(expression_2, str) and expression_2.isdigit():
+                            expression = [
+                                "ln|",
+                                expression_0
+                            ]
+                        else:
+                            raise NotImplementedError("Complex division requires substitution.")
+                    case "^":
+                        if isinstance(expression_2, str) and expression_2.isdigit():
+                            new_exponent = str(int(expression_2) + 1)
+                            expression = [
+                                expression_0,
+                                "^",
+                                new_exponent,
+                                "/",
+                                new_exponent
+                            ]
+                        else:
+                            raise NotImplementedError("Integration of non-integer powers requires advanced techniques.")
+
+        return expression
 
 
 
@@ -586,7 +764,7 @@ class Integral():
     __equation:   str
     __new_result: Decimal
     def __init__(self, *, a: str, b: str, EPS: str, equation: str):
-        Derivative(equation)
+        Derivative(equation, True)
     def __str__(self):
         return "0"
     """
