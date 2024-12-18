@@ -65,13 +65,10 @@ class SimpleExpression():
         # sheach first digit
         hex_i: int = expression[1]=='x' if len(expression) > 1 else False
         positions: list[int] = list() 
-        last_element: int = 0
         for element_i in range(len(expression)):
             if "%!-+*/:^|()sincoetanqrlg".find(expression[element_i]) != -1 and not ("-+".find(expression[element_i]) and "Ee".find(expression[element_i-1]) != -1 and not hex_i):
                 hex_i = expression[element_i+2] == 'x' if len(expression) > element_i+3 else False
-                if last_element != element_i:
-                    positions.append(element_i)
-                last_element = element_i + 1
+                positions.append(element_i)
 
 
                 
@@ -549,6 +546,7 @@ class Derivative(Calculate):
                 expression = str(Debuger(expression))
                 self.expression = list(SimpleExpression(expression))
                 derivate = self.reverse_derivate if reverse_derivate else self.ordinar_derivate
+                print(self.expression, 61)
                 self.diff = derivate(self.expression)
                 print(self.diff)
             except Exception as e:
@@ -664,31 +662,39 @@ class Derivative(Calculate):
         match len(expression):
             case 1:
                 print(19)
+                index: int
                 # Константа или переменная
                 if len(expression[0]) == 1:
-                    if expression[0][0] in "0123456789":
-                        expression = [expression[0], "*", "x"]  # C -> C*x
-                    else:
-                        expression = [["x", "^", "2"], "/", "2"]  # x -> x^2/2
+                    index = 0
+                else: 
+                    index = 1
+                if expression[0].isdigit():
+                    expression = [expression[0], "*", "x"]  # C -> C*x
+                elif expression[0] == 'x':
+                    expression = [["x", "^", "2"], "/", "2"]  # x -> x^2/2
                 else:
-                    expression = ["x"] if expression[0][1] in "0123456789" else [expression[0], "*", "x"]
-
+                    expression = "Error"
+                
             case 2:
                 expression_1: [str | list] = expression[1]
                 is_minus: bool = expression[0][0] == '-'
                 match expression[0][-3:]:
                     case 'sin':
-                        expression = ['-cos' if is_minus else 'cos', expression_1]
+                        expression = ['cos' if is_minus else '-cos', expression_1]
                     case 'cos':
-                        expression = ['sin' if is_minus else '-sin', expression_1]
+                        expression = ['-sin' if is_minus else 'sin', expression_1]
                     case 'tan':
-                        expression = ['-ln|cos' if is_minus else 'ln|cos', expression_1]
+                        expression_1: list[Any] = ["abs", ["cos", expression_1]]
+                        expression = ["ln", expression_1] if is_minus else ["-ln", expression_1]
                     case 'cot':
-                        expression = ['ln|sin' if is_minus else '-ln|sin', expression_1]
+                        expression_1: list[Any] = ["abs", ["sin", expression_1]]
+                        expression = ['-ln', expression_1] if is_minus else ['ln', expression_1]
                     case 'sec':
-                        expression = ['ln|sec+tan' if is_minus else '-ln|sec+tan', expression_1]
+                        expression_1: list[Any] = ["abs", [["sec", expression_1], "+", ["tan", expression_1]]]
+                        expression = ["ln", expression_1] if is_minus else ["-ln", expression_1]
                     case 'csc':
-                        expression = ['-ln|csc+cot' if is_minus else 'ln|csc+cot', expression_1]
+                        expression_1: list[Any] = ["abs", [["sec", expression_1], "+", ["tan", expression_1]]]
+                        expression = ["-ln", expression_1] if is_minus else ["ln", expression_1]
                     case _:
                         if isinstance(expression_1, list):
                             expression = [
@@ -707,38 +713,60 @@ class Derivative(Calculate):
                             expression[1],
                             self.reverse_derivate(expression_2)
                         ]
-                    case "*":
-                        # Интеграл произведения
-                        if isinstance(expression_0, str) and expression_0.isdigit():
-                            expression = [
-                                expression_0,
-                                "*",
-                                self.reverse_derivate(expression_2)
-                            ]
-                        elif isinstance(expression_2, str) and expression_2.isdigit():
-                            expression = [
-                                expression_2,
-                                "*",
-                                self.reverse_derivate(expression_0)
-                            ]
-                        else:
-                            raise NotImplementedError("Integration by parts is required.")
                     case "/":
-                        # Интеграл частного (замена переменной для линейных функций)
-                        if isinstance(expression_2, str) and expression_2.isdigit():
-                            expression = [
-                                "ln|",
+                        expression = [
+                            "ln", 
+                            [
+                                "abs", 
                                 expression_0
                             ]
+                        ]
+
+                    case "*":
+                        # Если dv - это константа, то интегрируем напрямую
+                        func = lambda expression: isinstance(expression, str) and (expression.isdigit() or expression == "x")
+                        if func(expression_0) and func(expression_2):
+                            if expression_0 == 'x':
+                                expression_0, expression_2 = expression_2, expression_0
+                            expression = [
+                                [[expression_0, "*", [expression_2, "^", "2"]], "/", "2"]
+                            ]
+                         # Если u - это тангенс или котангенс, интегрируем их напрямую
+                        elif isinstance(expression_0, list) and expression_0[0] == "tan":
+                            result = [
+                                [expression_2, "*", ["-ln", ["abs", ["cos", expression_0[1]]]]]
+                            ]
+                            return result
+                        elif isinstance(expression_0, list) and expression_0[0] == "cot":
+                            result = [
+                                [expression_2, "*", ["ln", ["abs", ["sin", expression_0[1]]]]]
+                            ]
+                            return result
                         else:
-                            raise NotImplementedError("Complex division requires substitution.")
+                            # Интегрирование по частям
+                            expression = [
+                                [
+                                    expression_0,  # Первый множитель
+                                    '*',
+                                    self.reverse_derivate(expression_2)  # Второй множитель
+                                ],
+                                '-',
+                                [
+                                    self.reverse_derivate(expression_2),
+                                    '*',
+                                    self.ordinar_derivate(expression_0)
+                                ]
+                            ]
+                        
                     case "^":
                         if isinstance(expression_2, str) and expression_2.isdigit():
-                            new_exponent = str(int(expression_2) + 1)
+                            new_exponent = str(Decimal(expression_2) + Decimal(1))
                             expression = [
-                                expression_0,
-                                "^",
-                                new_exponent,
+                                [
+                                    expression_0,
+                                    "^",
+                                    new_exponent
+                                ],
                                 "/",
                                 new_exponent
                             ]
