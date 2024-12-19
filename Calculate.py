@@ -106,12 +106,15 @@ class SimpleExpression():
             result_list = result_list[::-1]
         print(result_list, 33)
         for func in [
-                ['sin', ['s', 'i', 'n']], 
-                ['cos', ['c', 'o', 's']], 
-                ['tan', ['t', 'a', 'n']], 
-                ['cot', ['c', 'o', 't']], 
-                ['sec', ['s', 'e', 'c']], 
-                ['csc', ['c', 's', 'c']]
+            ['ln', ['l', 'n']],
+            ['lg', ['l', 'g']],
+            ['log', ['l', 'o', 'g']],
+            ['sin', ['s', 'i', 'n']], 
+            ['cos', ['c', 'o', 's']], 
+            ['tan', ['t', 'a', 'n']], 
+            ['cot', ['c', 'o', 't']], 
+            ['sec', ['s', 'e', 'c']], 
+            ['csc', ['c', 's', 'c']]
         ]:
             
             while func[1] in result_list:
@@ -699,6 +702,18 @@ class Derivative(Calculate):
                         case 'csc':
                             expression_1: list[Any] = ["abs", [["sec", expression_1], "+", ["tan", expression_1]]]
                             expression = ["-ln", expression_1] if is_minus else ["ln", expression_1]
+                    match expression[0][-2:]:
+                        case 'ln':
+                            if len(expression) == 2 and isinstance(expression[1], str):
+                                # Простая форма ln(x)
+                                expression = [
+                                    [expression_1, "*", ["ln", expression_1]], "-", expression_1
+                                ]
+                            elif len(expression) == 2 and isinstance(expression[1], list):
+                                # Сложная форма ln(f(x))
+                                expression = [
+                                    [expression, "*", ["ln", expression]], "-", self.reverse_derivate(expression_1)
+                                ]
                 else:
                     expression = [
                         expression,
@@ -731,18 +746,24 @@ class Derivative(Calculate):
                         elif isinstance(expression_0, str):
                             if expression_0 == 'x':
                                 expression_0 = self.reverse_derivate(expression_0)
+                            else:
+                                expression_2 = self.reverse_derivate(expression_2)
                             expression = [
                                 expression_0,
                                 '*',
-                                self.reverse_derivate(expression_2)
+                                expression_2
                             ]
                         elif isinstance(expression_2, str):
+                            print('jklg')
                             if expression_2 == 'x':
                                 expression_2 = self.reverse_derivate(expression_2)
+                            else:
+                                expression_0 = self.reverse_derivate(expression_0)
+
                             expression = [
                                 expression_2,
                                 '*',
-                                self.reverse_derivate(expression_0)
+                                expression_0
                             ]
                         """
                         # Если dv - это константа, то интегрируем напрямую
