@@ -66,7 +66,7 @@ class SimpleExpression():
         hex_i: int = expression[1]=='x' if len(expression) > 1 else False
         positions: list[int] = list() 
         for element_i in range(len(expression)):
-            if "%!-+*/:^|()sincoetanqrlg".find(expression[element_i]) != -1 and not ("-+".find(expression[element_i]) and "Ee".find(expression[element_i-1]) != -1 and not hex_i):
+            if "%!-+*/:^|()sincoetanqrlg".find(expression[element_i]) != -1 and not ("-+".find(expression[element_i]) != -1 and "Ee".find(expression[element_i-1]) != -1 and not hex_i):
                 hex_i = expression[element_i+2] == 'x' if len(expression) > element_i+3 else False
                 positions.append(element_i)
 
@@ -658,7 +658,8 @@ class Derivative(Calculate):
 
         return expression
 
-    def reverse_derivate(self: Self, expression: [list | str]):
+    def reverse_derivate(self: Self, expression: [list | str], const: bool = False):
+        is_const: bool = False
         match len(expression):
             case 1:
                 print(19)
@@ -670,6 +671,7 @@ class Derivative(Calculate):
                     index = 1
                 if expression[0].isdigit():
                     expression = [expression[0], "*", "x"]  # C -> C*x
+                    is_const = True
                 elif expression[0] == 'x':
                     expression = [["x", "^", "2"], "/", "2"]  # x -> x^2/2
                 else:
@@ -677,32 +679,33 @@ class Derivative(Calculate):
                 
             case 2:
                 expression_1: [str | list] = expression[1]
-                is_minus: bool = expression[0][0] == '-'
-                match expression[0][-3:]:
-                    case 'sin':
-                        expression = ['cos' if is_minus else '-cos', expression_1]
-                    case 'cos':
-                        expression = ['-sin' if is_minus else 'sin', expression_1]
-                    case 'tan':
-                        expression_1: list[Any] = ["abs", ["cos", expression_1]]
-                        expression = ["ln", expression_1] if is_minus else ["-ln", expression_1]
-                    case 'cot':
-                        expression_1: list[Any] = ["abs", ["sin", expression_1]]
-                        expression = ['-ln', expression_1] if is_minus else ['ln', expression_1]
-                    case 'sec':
-                        expression_1: list[Any] = ["abs", [["sec", expression_1], "+", ["tan", expression_1]]]
-                        expression = ["ln", expression_1] if is_minus else ["-ln", expression_1]
-                    case 'csc':
-                        expression_1: list[Any] = ["abs", [["sec", expression_1], "+", ["tan", expression_1]]]
-                        expression = ["-ln", expression_1] if is_minus else ["ln", expression_1]
-                    case _:
-                        if isinstance(expression_1, list):
-                            expression = [
-                                self.reverse_derivate(expression_1), "*", "x"
-                            ]
-                        else:
-                            expression = [expression[1], "*", "x"]
-
+                print(self.reverse_derivate(expression_1, True)[1], expression_1)
+                if not self.reverse_derivate(expression_1, True)[1]:
+                    is_minus: bool = expression[0][0] == '-'
+                    match expression[0][-3:]:
+                        case 'sin':
+                            expression = ['cos' if is_minus else '-cos', expression_1]
+                        case 'cos':
+                            expression = ['-sin' if is_minus else 'sin', expression_1]
+                        case 'tan':
+                            expression_1: list[Any] = ["abs", ["cos", expression_1]]
+                            expression = ["ln", expression_1] if is_minus else ["-ln", expression_1]
+                        case 'cot':
+                            expression_1: list[Any] = ["abs", ["sin", expression_1]]
+                            expression = ['-ln', expression_1] if is_minus else ['ln', expression_1]
+                        case 'sec':
+                            expression_1: list[Any] = ["abs", [["sec", expression_1], "+", ["tan", expression_1]]]
+                            expression = ["ln", expression_1] if is_minus else ["-ln", expression_1]
+                        case 'csc':
+                            expression_1: list[Any] = ["abs", [["sec", expression_1], "+", ["tan", expression_1]]]
+                            expression = ["-ln", expression_1] if is_minus else ["ln", expression_1]
+                else:
+                    expression = [
+                        expression,
+                        '*',
+                        'x'
+                    ]
+                    is_const = True
             case 3:
                 expression_0: [str | list] = expression[0]
                 expression_2: [str | list] = expression[2]
@@ -723,6 +726,25 @@ class Derivative(Calculate):
                         ]
 
                     case "*":
+                        if expression_0 == expression_2:
+                            expression = '1'
+                        elif isinstance(expression_0, str):
+                            if expression_0 == 'x':
+                                expression_0 = self.reverse_derivate(expression_0)
+                            expression = [
+                                expression_0,
+                                '*',
+                                self.reverse_derivate(expression_2)
+                            ]
+                        elif isinstance(expression_2, str):
+                            if expression_2 == 'x':
+                                expression_2 = self.reverse_derivate(expression_2)
+                            expression = [
+                                expression_2,
+                                '*',
+                                self.reverse_derivate(expression_0)
+                            ]
+                        """
                         # Если dv - это константа, то интегрируем напрямую
                         func = lambda expression: isinstance(expression, str) and (expression.isdigit() or expression == "x")
                         if func(expression_0) and func(expression_2):
@@ -757,7 +779,7 @@ class Derivative(Calculate):
                                     self.ordinar_derivate(expression_0)
                                 ]
                             ]
-                        
+                        """
                     case "^":
                         if isinstance(expression_2, str) and expression_2.isdigit():
                             new_exponent = str(Decimal(expression_2) + Decimal(1))
@@ -771,9 +793,10 @@ class Derivative(Calculate):
                                 new_exponent
                             ]
                         else:
-                            raise NotImplementedError("Integration of non-integer powers requires advanced techniques.")
+                            expression = [expression, '/', ['ln', expression_0]]
+                            #raise NotImplementedError("Integration of non-integer powers requires advanced techniques.")
 
-        return expression
+        return (expression, is_const) if const else expression
 
 
 
