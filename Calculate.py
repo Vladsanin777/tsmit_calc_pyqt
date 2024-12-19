@@ -1,10 +1,34 @@
 from math import *
 from decimal import Decimal
-from re import sub
+from re import sub, findall
 import traceback
 import threading
 from functools import wraps
-from typing import Self, Any
+from typing import Self, Any, List, Union
+
+
+def threaded_class(cls):
+    """Декоратор для выполнения инициализации класса в отдельном потоке."""
+    class ThreadedClass:
+        def __init__(self: Self, *args, **kwargs):
+            self._init_done = threading.Event()
+            self._thread = threading.Thread(target=self._initialize, args=(cls, args, kwargs), daemon=True)
+            self._thread.start()
+            self._init_done.wait()
+
+        def _initialize(self: Self, cls, args, kwargs):
+            self._instance = cls(*args, **kwargs)
+            self._init_done.set()
+
+        def __getattr__(self, item):
+            return getattr(self._instance, item)
+
+        def join(self):
+            """Ожидание завершения потока."""
+            self._thread.join()
+        def __str__(self):
+            return str(self._instance)
+    return ThreadedClass
 
 class Debuger:
         """
@@ -53,10 +77,68 @@ class Debuger:
 
         class BracketsError(Exception): ...
 
+class SimpleExpression:
+    def __init__(self, expression: str):
+        """
+        Разбирает строку математического выражения на список токенов (чисел и операторов).
+        :param expression: Строка математического выражения
+        """
+        self.result = self._parse_expression(expression)
+        self._process_brackets()
+        self.result = self._build_expression_tree(self.result)
+
+    def __iter__(self):
+        return iter(self.result)
+
+    def _parse_expression(self, expression: str) -> List[str]:
+        """
+        Разбирает строку выражения на числа, операторы и функции.
+        :param expression: Строка математического выражения
+        :return: Список токенов
+        """
+        tokens = findall(r'\d+\.\d+|\d+|[+\-*/^()]|sin|cos|tan|cot|log|ln|lg', expression)
+        return tokens
+
+    def _process_brackets(self) -> None:
+        """
+        Обрабатывает круглые скобки, преобразуя их содержимое в отдельные вложенные списки.
+        """
+        stack = []
+        for i, token in enumerate(self.result):
+            if token == '(':
+                stack.append(i)
+            elif token == ')':
+                if not stack:
+                    raise ValueError("Unmatched closing bracket")
+                start = stack.pop()
+                sub_expression = self.result[start + 1:i]
+                self.result = self.result[:start] + [sub_expression] + self.result[i + 1:]
+        if stack:
+            raise ValueError("Unmatched opening bracket")
+
+    def _build_expression_tree(self, tokens: List[Union[str, List]]) -> List:
+        """
+        Преобразует список токенов в дерево выражений с учетом приоритетов операторов.
+        :param tokens: Список токенов
+        :return: Дерево выражений
+        """
+        if len(tokens) == 1:
+            return tokens[0] if isinstance(tokens[0], list) else [tokens[0]]
+        print(tokens)
+        operators = {'sin': 0, '^': 1, '*': 2, '/': 2, '+': 3, '-': 3}
+        max_priority = max((operators[token] for token in tokens if token in operators), default=-1)
+
+        for op, priority in operators.items():
+            if priority == max_priority:
+                index = tokens.index(op)
+                left = self._build_expression_tree(tokens[:index])
+                right = self._build_expression_tree(tokens[index + 1:])
+                return [left, op, right]
+
+        return tokens
 
 
-
-class SimpleExpression():
+class SimpleExpression_OLD():
     result: list[str]
     # Разбиение строки на отдельные элементы (числа и операторы)
     def __init__(self: Self, expression: str):
@@ -202,31 +284,114 @@ class SimpleExpression():
 
 
 
-def threaded_class(cls):
-    """Декоратор для выполнения инициализации класса в отдельном потоке."""
-    class ThreadedClass:
-        def __init__(self: Self, *args, **kwargs):
-            self._init_done = threading.Event()
-            self._thread = threading.Thread(target=self._initialize, args=(cls, args, kwargs), daemon=True)
-            self._thread.start()
-            self._init_done.wait()
 
-        def _initialize(self: Self, cls, args, kwargs):
-            self._instance = cls(*args, **kwargs)
-            self._init_done.set()
-
-        def __getattr__(self, item):
-            return getattr(self._instance, item)
-
-        def join(self):
-            """Ожидание завершения потока."""
-            self._thread.join()
-        def __str__(self):
-            return str(self._instance)
-    return ThreadedClass
-
+class FloatDecimal:
+    def __init__(self, number: str):
+        print(number)
+        minus = False
+        if number.startswith('-'):
+            number = number[1:]
+            minus = True
+        value: Decimal
+        match number[:2]:
+            case "0x":
+                print(number, 17)
+                value = Decimal(float.fromhex(number))
+            case "0b":
+                number = number[2:]
+                integer_part, fractional_part = (number.split('.') if '.' in number else (number, ''))
+                integer_value = int(integer_part, 2) if integer_part else 0
+                fractional_value = sum(
+                    int(bit) * 2**(-i) for i, bit in enumerate(fractional_part, start=1)
+                )
+                value = Decimal(integer_value + fractional_value)
+            case "0t":
+                number = number[2:]
+                integer_part, fractional_part = (number.split('.') if '.' in number else (number, ''))
+                integer_value = int(integer_part, 8) if integer_part else 0
+                fractional_value = sum(
+                    int(digit) * 8**(-i) for i, digit in enumerate(fractional_part, start=1)
+                )
+                value = Decimal(integer_value + fractional_value)
+            case _:
+                print(number[:2], "gh")
+                value = Decimal(number)
+        print(15)
+        self.value = -value if minus else value
+    def float(self):
+        return self.value
+    def __str__(self):
+        print(str(self.value), 657)
+        return str(self.value)
 
 class Calculate:
+    result: str
+    expression: list[Any]
+    def __init__(self, expression):
+        expression = expression.replace(" ", "")
+        if expression == "": self.result = "0"
+        else:
+            try:
+                expression = str(Debuger(expression))
+                self.expression = list(SimpleExpression(expression))
+                print(self.expression)
+                self.result = self.calc(self.expression)
+            except Exception as e:
+                print(e)
+                traceback.print_exc()
+                self.result = "Error"
+    def calc(self: Self, expression: list[Any]):
+        result: str = "Error"
+        match len(expression):
+            case 1:
+                result = expression[0]
+            case 2:
+                expression_1 = expression[1]
+                expression_0 = expression[0]
+                minus: bool
+                if isinstance(expression[1], list):
+                    expression_1 = self.calc(expression_1)
+                if expression_0[0]:
+                    minus = True
+                func: function
+                match expression[0][-3:]:
+                    case "sin":
+                        func = sin
+                    case "cos":
+                        func = cos
+                    case "tan":
+                        func = tan
+                    case "cot":
+                        func = lambda x: 1 / tan(x)
+                    case "sec":
+                        func = lambda x: 1 / cos(x)
+                    case "csc":
+                        func = lambda x: 1 / sin(x)
+                result = ("-" if minus else "") + str(func(float(expression_1)))
+            case 3:
+                expression_0 = expression[0]
+                expression_1 = expression[1]
+                expression_2 = expression[2]
+                if isinstance(expression_0, list):
+                    expression_0 = self.calc(expression_0)
+                if isinstance(expression_2, list):
+                    expression_2 = self.calc(expression_2)
+                expression_0_Decimal = FloatDecimal(expression_0).float()
+                expression_2_Decimal = FloatDecimal(expression_2).float()
+                match expression_1:
+                    case '*':
+                        result = expression_0_Decimal * expression_2_Decimal
+                    case '/':
+                        result = expression_0_Decimal / expression_2_Decimal
+                    case '+':
+                        result = expression_0_Decimal + expression_2_Decimal
+                    case '-':
+                        result = expression_0_Decimal - expression_2_Decimal
+        return str(result)
+    def __str__(self: Self) -> str:
+        return self.result
+
+class Calculate_OLD:
     result: str
     def __init__(self, expression):
         expression = expression.replace(" ", "")
