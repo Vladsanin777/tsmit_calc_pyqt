@@ -1,6 +1,7 @@
 from math import *
 from decimal import Decimal
 from re import sub, findall
+import re
 import traceback
 import threading
 from functools import wraps
@@ -83,10 +84,13 @@ class SimpleExpression:
         Разбирает строку математического выражения на список токенов (чисел и операторов).
         :param expression: Строка математического выражения
         """
-        self.result = self._parse_expression(expression)
-        self._process_brackets()
-        self.result = self._build_expression_tree(self.result)
+        # Разбиваем выражение на токены
+        tokens = self.tokenize_expression(expression)
+        print("Tokens:", tokens)  # Для отладки
 
+        # Создаём дерево выражения
+        self.result = self._build_expression_tree(tokens)
+        print(self.result, "result")
     def __iter__(self):
         return iter(self.result)
 
@@ -116,173 +120,83 @@ class SimpleExpression:
         if stack:
             raise ValueError("Unmatched opening bracket")
 
-    def _build_expression_tree(self, tokens: List[Union[str, List]]) -> List:
+    def tokenize_expression(self, expression: str) -> List[str]:
         """
-        Преобразует список токенов в дерево выражений с учетом приоритетов операторов.
-        :param tokens: Список токенов
-        :return: Дерево выражений
+        Разбивает строку выражения на токены.
         """
-        if len(tokens) == 1:
-            return tokens[0] if isinstance(tokens[0], list) else [tokens[0]]
-        print(tokens)
-        operators = {'sin': 0, '^': 1, '*': 2, '/': 2, '+': 3, '-': 3}
-        max_priority = max((operators[token] for token in tokens if token in operators), default=-1)
+        functions = [
+            'arcsin', 'arccos', 'arctan', 'arccot', 'arcsec', 'arccsc',
+            'sin', 'cos', 'tan', 'cot', 'log', 'ln', 'lg'
+        ]
+        token_pattern = (
+            r"(" +
+            r"|".join(re.escape(func) for func in functions) +  # Функции
+            r"|[+\-*/^()]" +                                     # Операторы и скобки
+            r"|[0-9]+(?:\.[0-9]*)?(?:[eE][+-]?[0-9]+)?" +        # Числа
+            r"|[^a-zA-Z0-9\s]" +                                 # Остальные символы
+            r")"
+        )
+        return re.findall(token_pattern, expression)
 
-        for op, priority in operators.items():
-            if priority == max_priority:
-                index = tokens.index(op)
-                left = self._build_expression_tree(tokens[:index])
-                right = self._build_expression_tree(tokens[index + 1:])
-                return [left, op, right]
+    def _build_expression_tree(self, tokens: List[str]) -> Union[str, List]:
+        """
+        Рекурсивно строит дерево выражения из токенов.
+        """
+        def parse_expression(tokens: List[str]) -> List:
+            stack = []  # Стек для хранения выражений
+            operators = []  # Стек операторов
 
-        return tokens
+            def apply_operator():
+                # Применяет оператор к верхним элементам стека
+                operator = operators.pop()
+                right = stack.pop()
+                left = stack.pop()
+                stack.append([left, operator, right])
 
+            precedence = {'+': 1, '-': 1, '*': 2, '/': 2, '^': 3}
+            i = 0
+            while i < len(tokens):
+                token = tokens[i]
+                if token.isdigit() or re.match(r"^[a-zA-Z]", token):
+                    # Число или функция
+                    if token in ['sin', 'cos', 'tan', 'cot', 'log', 'ln', 'lg', 'arcsin', 'arccos', 'arctan', 'arccot', 'arcsec', 'arccsc']:
+                        # Проверяем, есть ли аргумент функции (например, sin1)
+                        if i + 1 < len(tokens) and tokens[i + 1].isdigit():
+                            stack.append([token, tokens[i + 1]])
+                            i += 1  # Пропускаем число, так как оно уже добавлено
+                        else:
+                            stack.append(token)
+                    else:
+                        stack.append(token)
+                elif token == '(':
+                    # Найти соответствующую закрывающую скобку
+                    depth = 1
+                    j = i + 1
+                    while j < len(tokens):
+                        if tokens[j] == '(':
+                            depth += 1
+                        elif tokens[j] == ')':
+                            depth -= 1
+                        if depth == 0:
+                            break
+                        j += 1
+                    # Рекурсивно разобрать подвыражение
+                    stack.append(parse_expression(tokens[i + 1:j]))
+                    i = j
+                elif token in precedence:
+                    # Оператор
+                    while (operators and precedence.get(operators[-1], 0) >= precedence[token]):
+                        apply_operator()
+                    operators.append(token)
+                i += 1
 
-class SimpleExpression_OLD():
-    result: list[str]
-    # Разбиение строки на отдельные элементы (числа и операторы)
-    def __init__(self: Self, expression: str):
+            # Применить оставшиеся операторы
+            while operators:
+                apply_operator()
 
+            return stack[0]
 
-        # sheach first digit
-        hex_i: int = expression[1]=='x' if len(expression) > 1 else False
-        positions: list[int] = list() 
-        for element_i in range(len(expression)):
-            if "%!-+*/:^|()sincoetanqrlg".find(expression[element_i]) != -1 and not ("-+".find(expression[element_i]) != -1 and "Ee".find(expression[element_i-1]) != -1 and not hex_i):
-                hex_i = expression[element_i+2] == 'x' if len(expression) > element_i+3 else False
-                positions.append(element_i)
-
-
-                
-        print(positions, 78)
-        result_list = list()
-        index_old: int = -2
-        delete_positions: int = 0
-        for index in range(len(positions)):
-            index -= delete_positions
-            print(index)
-            if index_old + 1 == positions[index] and expression[positions[index]] in ")":
-                print(positions.pop(index), 90)
-                delete_positions += 1
-            else:
-                index_old = positions[index]
-
-
-        print(positions)
-        while positions != []:
-            print(positions, 77)
-            # wrating first digit in result list
-            if (element := expression[(number_operators := positions.pop())+1:]) != "": 
-                result_list.append(element)
-            # wrating operator in result list
-            result_list.append(expression[number_operators])
-            print(result_list, 76)
-            # trimming string expression
-            expression = expression[:number_operators]
-            print(expression, 75)
-        if result_list == []:
-            print(89)
-            if expression: result_list = [expression]
-        else:
-            if expression: result_list.append(expression)
-            result_list = result_list[::-1]
-        print(result_list, 33)
-        for func in [
-            ['ln', ['l', 'n']],
-            ['lg', ['l', 'g']],
-            ['log', ['l', 'o', 'g']],
-            ['sin', ['s', 'i', 'n']], 
-            ['cos', ['c', 'o', 's']], 
-            ['tan', ['t', 'a', 'n']], 
-            ['cot', ['c', 'o', 't']], 
-            ['sec', ['s', 'e', 'c']], 
-            ['csc', ['c', 's', 'c']]
-        ]:
-            
-            while func[1] in result_list:
-                index = result_list.index(func[1])  # Найти подсписок
-                result_list[index] = func[0]       # Заменить подсписок на строку
-
-            # Проверяем наличие строки последовательных символов
-            for i in range(len(result_list) - len(func[1]) + 1):
-                if result_list[i:i + len(func[1])] == func[1]:  # Если срез совпадает
-                    result_list[i:i + len(func[1])] = [func[0]]
-                    """
-                    if len(result_list) > i+2:
-                        if result_list[i + 1] != '(':
-                            result_list.insert(i+1, '(')
-                            if len(result_list) > i+4:
-                                result_list.insert(i+3, ')')
-                            else:
-                                result_list.append(')')
-                    """
-        print(result_list, 34)
-        self.result = result_list
-        self.delete_brackets()
-        self.result = self.add_lists(self.result)
-        print(self.result, 13)
-    def __iter__(self):
-        return iter(self.result)
-    def delete_brackets(self: Self) -> None:
-        print(self.result, 579)
-        while "(" in self.result:
-            print(89)
-            index_open_bracket = max(index for index in range(len(self.result)) if self.result[index] == '(')
-            index_close_bracket: str
-            for index_close_bracket in \
-                    [index for index in range(len(self.result)) if self.result[index] == ')']:
-                if index_open_bracket < index_close_bracket:
-                    break
-            self.result.pop(index_open_bracket)
-            if index_open_bracket != 0 and self.result[index_open_bracket-1][0] in "0123456789":
-                self.result.insert(index_open_bracket, "*")
-                index_open_bracket += 1
-                index_close_bracket += 1
-            sub_result: list[str] = list()
-            for _ in range(index_close_bracket - index_open_bracket - 1):
-                sub_result.append(self.result.pop(index_open_bracket))
-            self.result[index_open_bracket] = sub_result[0] if len(sub_result) == 1 else sub_result
-            index_open_bracket += 1
-            if len(self.result) > index_open_bracket:
-                if self.result[index_open_bracket][0] in "0123456789":
-                    self.result.insert(index_open_bracket, "*")
-        while len(self.result) == 1 and isinstance(self.result[0], list):
-            self.result = self.result[0]
-    def add_lists(self: Self, equality) -> None:
-        index_priority_operator: int = 0
-        priority_operator_func = lambda lst, x: len(lst) - 1 - lst[::-1].index(x)
-        if "sin" in equality:
-            index_priority_operator = priority_operator_func(equality, "sin")
-        if "^" in equality:
-            index_priority_operator = priority_operator_func(equality, "^")
-        if "*" in equality and "/" in equality:
-            index_priority_operator = priority_operator_func(equality, "*")
-            if index_priority_operator and index_priority_operator < (t := priority_operator_func(equality, "-")):
-                index_priority_operator = t
-        elif "*" in equality:
-            index_priority_operator = priority_operator_func(equality, "*")
-        elif "/" in equality:
-            index_priority_operator = priority_operator_func(equality, "/")
-        if "+" in equality and "-" in equality:
-            index_priority_operator = priority_operator_func(equality, "+")
-            if index_priority_operator and index_priority_operator < (t := priority_operator_func(equality, "-")):
-                index_priority_operator = t
-        elif "+" in equality:
-            index_priority_operator = priority_operator_func(equality, "+")
-        elif "-" in equality:
-            index_priority_operator = priority_operator_func(equality, "-")
-        if index_priority_operator:
-            first_part = self.add_lists(t) if len(t := equality[:index_priority_operator]) > 1 else t[0]
-            last_part = self.add_lists(t) if len(t := equality[index_priority_operator+1:]) > 1 else t[0]
-            operator = equality[index_priority_operator]
-            equality.clear()
-            equality.append(first_part)
-            equality.append(operator)
-            equality.append(last_part)
-        return equality
-
-
-
+        return parse_expression(tokens)
 
 
 class FloatDecimal:
@@ -342,32 +256,57 @@ class Calculate:
                 self.result = "Error"
     def calc(self: Self, expression: list[Any]):
         result: str = "Error"
+        if expression[0] == []:
+            expression.pop(0)
+        print(len(expression), "er")
+        print(expression)
         match len(expression):
             case 1:
                 result = expression[0]
             case 2:
                 expression_1 = expression[1]
                 expression_0 = expression[0]
-                minus: bool
+                minus: bool = False
                 if isinstance(expression[1], list):
                     expression_1 = self.calc(expression_1)
-                if expression_0[0]:
+                if expression_0[0] == '-':
                     minus = True
                 func: function
-                match expression[0][-3:]:
-                    case "sin":
-                        func = sin
-                    case "cos":
-                        func = cos
-                    case "tan":
-                        func = tan
-                    case "cot":
-                        func = lambda x: 1 / tan(x)
-                    case "sec":
-                        func = lambda x: 1 / cos(x)
-                    case "csc":
-                        func = lambda x: 1 / sin(x)
-                result = ("-" if minus else "") + str(func(float(expression_1)))
+                match expression[0][-6:]:
+                    case "arcsin":
+                        func = asin
+                    case "arccos":
+                        func = acos
+                    case "arctan":
+                        func = atan
+                    case "arccot":
+                        func = lambda x: 1 / atan(x)
+                    case "arcsec":
+                        func = lambda x: 1 / acos(x)
+                    case "arccsc":
+                        func = lambda x: 1 / asin(x)
+                    case _:
+                        match expression[0][-3:]:
+                            case "sin":
+                                func = sin
+                            case "cos":
+                                func = cos
+                            case "tan":
+                                func = tan
+                            case "cot":
+                                func = lambda x: 1 / tan(x)
+                            case "sec":
+                                func = lambda x: 1 / cos(x)
+                            case "csc":
+                                func = lambda x: 1 / sin(x)
+                preliminary_result = str(func(float(expression_1)))
+                preliminary_result_0 = preliminary_result[0]
+                if minus and preliminary_result_0 == '-':
+                    result = preliminary_result[1:]
+                elif minus and not preliminary_result_0 == '-':
+                    result = "-" + preliminary_result
+                else:
+                    result = preliminary_result
             case 3:
                 expression_0 = expression[0]
                 expression_1 = expression[1]
@@ -387,318 +326,12 @@ class Calculate:
                         result = expression_0_Decimal + expression_2_Decimal
                     case '-':
                         result = expression_0_Decimal - expression_2_Decimal
+                    case '^':
+                        result = expression_0_Decimal ** expression_2_Decimal
         return str(result)
     def __str__(self: Self) -> str:
         return self.result
 
-class Calculate_OLD:
-    result: str
-    def __init__(self, expression):
-        expression = expression.replace(" ", "")
-        if expression == "": self.result = "0"
-        else:
-            try:
-                expression = str(self.Debuger(expression))
-                while (count_brackets := expression.count("(")) != 0:
-                    print("1")
-                    priority_brackets = self._searching_for_priority_brackets(
-                        expression, 
-                        count_brackets
-                    )
-                    inner_expression = expression[priority_brackets[0] + 1:priority_brackets[1]]
-                    print(4)
-                    add_multiplication = lambda symbol: '' if symbol in "-+*/^:snlgm|" else '*'
-                    expression = (
-                        (t1 := expression[:priority_brackets[0]]) +
-                        add_multiplication(t1[-1])+
-                        str(self.SimpleExpressionCalculation(inner_expression)) +
-                        (add_multiplication(t2[0]) +
-                        t2 if len(t2 := expression[priority_brackets[1] + 1:]) != 0 else '')
-                    )
-                self.result = self.removing_zeros(str(self.SimpleExpressionCalculation(expression)))
-            except Exception as e:
-                print(e)
-                traceback.print_exc()
-                self.result = "Error"
-
-    def __str__(self):
-        return self.result
-    def float(self):
-        return Decimal(self.result)
-    
-    def _find_nth_occurrence(self, string: str, substring: str, n: int) -> int:
-        start = 0
-        for _ in range(n):
-            start = string.find(substring, start)
-            if start == -1:
-                return -1  # Если подстрока не найдена
-            start += len(substring)
-        return start - len(substring)
-    
-    # Метод для поиска приоритетных скобок
-    def _searching_for_priority_brackets(self, expression: str, number_of_bracket: int) -> list[int]:
-        return [(number_last_open_brackets := self._find_nth_occurrence(expression, '(', number_of_bracket)), expression.find(')', number_last_open_brackets)]
-    def removing_zeros(self, expression: str) -> str:
-        if '.' in expression and not 'E' in expression:
-            while expression[-1] == '0': expression = expression[:-1]
-            if expression and expression[-1] == '.': expression = expression[:-1]
-        return expression if expression else '0'
-
-
-    class Debuger:
-        """
-        Класс для обработки математических выражений: очистка, замена операторов и проверка скобок.
-        """
-        def __init__(self, expression: str):
-            if "^*" in expression:
-                raise Exception("Two operators in expression \"^*\"")
-            if "*^" in expression:
-                raise Exception("Two operators in expression \"*^\"")
-
-            expression = expression.replace("**", "^").replace(":", "/").replace(",", ".").replace("//", "/").replace("--", "+")
-            while "++" in expression:
-                expression = expression.replace("++", "+")
-            while "//" in expression:
-                expression = expression.replace("//", "/")
-            while "^^" in expression:
-                expression = expression.replace("^^", "^")
-            expression = expression.replace("^*", "^")
-            # Удаление символов в конце строки
-            expression = sub(r'[*/:+\-\^lmngs()]+$', '', expression)
-            self.expression = expression
-            # Добавление недостающих закрывающих скобок
-            self.expression += ")" * self.verification_brackets()
-
-        def verification_brackets(self) -> int:
-            """
-            Проверяет баланс скобок в выражении. Возвращает количество недостающих закрывающих скобок.
-            Выбрасывает BracketsError, если баланс нарушен (лишние закрывающие скобки).
-            """
-            bracket = 0
-            for symbol in self.expression:
-                if symbol == "(":
-                    bracket += 1
-                elif symbol == ")":
-                    bracket -= 1
-                if bracket < 0:
-                    raise self.BracketsError("verification_brackets")
-            return bracket
-
-        def __str__(self) -> str:
-            """
-            Возвращает обработанное выражение.
-            """
-            return self.expression
-
-        class BracketsError(Exception): ...
-    @threaded_class
-    class SimpleExpressionCalculation:
-
-        # Разбиение строки на отдельные элементы (числа и операторы)
-        def __init__(self, expression: str):
-            # sheach first digit
-            hex_i: int = expression[1]=='x' if len(expression) > 1 else False
-            positions: list[int] = list() 
-            for element_i in range(len(expression)):
-                if "%!-+*/:^sngolm|".find(expression[element_i]) != -1 and not ("-+".find(expression[element_i]) and "Ee".find(expression[element_i-1]) != -1 and not hex_i):
-                    positions.append(element_i)
-                    hex_i = expression[element_i+2] == 'x' if len(expression) > element_i+3 else False
-
-
-                    
-            print(positions, 78)
-            result_list = list()
-            while positions != []:
-                print(positions, 77)
-                # wrating first digit in result list
-                if (element := expression[(number_operators := positions.pop())+1:]) != "": result_list.append(element)
-                # wrating operator in result list
-                result_list.append(expression[number_operators])
-                print(result_list, 76)
-                # trimming string expression
-                expression = expression[:number_operators]
-                print(expression, 75)
-            if result_list == []:
-                print(89)
-                if expression: result_list = [expression]
-            else:
-                if expression: result_list.append(expression)
-                result_list = result_list[::-1]
-            print(result_list, 34)
-            self.result = self._calculate_expression_list(result_list)
-            print(self.result, 13)
-        def __str__(self) -> str:
-            return self.result
-        def _number_negative(self, number):
-            return number[1:] if number[0] == '-' else '-' + number
-        def _check_for_negative_numbers(self, tokens: list[str]) -> list[str]:
-            if tokens[0] == '-': 
-                tokens.pop(0)
-                tokens[0] = self._number_negative(tokens[0])
-            #print([index for index, value in enumerate(tokens) if value == "-"])
-            for index in reversed([index for index, value in enumerate(tokens) if value == "-"]):
-                if tokens[index-1] in "-/*+":
-                    print(1)
-                    tokens.pop(index)
-                    tokens[index] = self._number_negative(tokens[index])
-            print(tokens, 1234)
-            return tokens
-            
-        def is_not_operator(self, number_or_operator):
-            return "%!-+*/:^sngol|m".find(number_or_operator) == -1
-
-        def not_operator(self, tokens):
-            print(tokens, len(tokens), "len")
-            for index in range(len(tokens)-1):
-                if self.is_not_operator(tokens[index]) and self.is_not_operator(tokens[index+1]):
-                    return index + 1
-            return 0
-        
-        def adding_multiplication(self, tokens):
-            while (index := self.not_operator(tokens)):
-                print(index, 102)
-                tokens.insert(index, "*")
-            return tokens
-
-        # Main method for calculate
-        def _calculate_expression_base(self, tokens: list[str]) -> str:
-            print(tokens, 73)
-            tokens = self._check_for_negative_numbers(tokens)
-            print(tokens)
-            priority_operator_index = 0
-            if len(tokens) > 1:
-                tokens = self.adding_multiplication(tokens)
-            print(tokens, 89)
-            while len(tokens) != 1:
-                """ Adding operation mod """
-                tokens_index = tokens.index
-                if "^" in tokens:
-                    tokens.pop(priority_operator_index := tokens_index("^"))
-                    tokens[priority_operator_index-1] = str(
-                        self.FloatDecimal(tokens[priority_operator_index-1]).float() **
-                        self.FloatDecimal(tokens.pop(priority_operator_index)).float()
-                    )
-                elif "*" in tokens:
-                    tokens.pop(priority_operator_index := tokens_index("*"))
-                    tokens[priority_operator_index-1] = str(
-                        self.FloatDecimal(tokens[priority_operator_index-1]).float() *
-                        self.FloatDecimal(tokens.pop(priority_operator_index)).float()
-                    )
-                elif (verification := ":" in tokens) or "/" in tokens:
-                    tokens.pop(priority_operator_index := tokens_index(":" if verification else "/"))
-                    tokens[priority_operator_index-1] = str(
-                        self.FloatDecimal(tokens[priority_operator_index-1]).float() /
-                        self.FloatDecimal(tokens.pop(priority_operator_index)).float()
-                    )
-                elif "m" in tokens:
-                    tokens.pop(priority_operator_index := tokens_index("m"))
-                    tokens[priority_operator_index-1] = str(
-                        self.FloatDecimal(tokens[priority_operator_index-1]).float() %
-                        self.FloatDecimal(tokens.pop(priority_operator_index)).float()
-                    )
-                elif "-" in tokens:
-                    tokens.pop(priority_operator_index := tokens_index("-"))
-                    tokens[priority_operator_index-1] = str(
-                        self.FloatDecimal(tokens[priority_operator_index-1]).float() -
-                        self.FloatDecimal(tokens.pop(priority_operator_index)).float()
-                    )
-                elif "+" in tokens:
-                    tokens.pop(priority_operator_index := tokens_index("+"))
-                    tokens[priority_operator_index-1] = str(
-                        self.FloatDecimal(tokens[priority_operator_index-1]).float() +
-                        self.FloatDecimal(tokens.pop(priority_operator_index)).float()
-                    )
-                elif '|' in tokens:
-                    print(tokens)
-                    tokens[0] = "".join(tokens)
-                    while len(tokens) > 1:
-                        tokens.pop()
-            print(tokens[0])
-            return str(self.FloatDecimal(tokens[0]).float()+Decimal(0.0))
-            
-        # Calculate persent and factorial
-        def _calculate_expression_list(self, tokens: list[str]) -> str:
-            print(tokens)
-            position: list[int] = [element_i for element_i in range(len(tokens)) if "%!ngsl".find(tokens[element_i]) != -1]
-            print(position)
-            step: int = 0
-            for index in position:
-                index -= step
-                step += 1
-                if '%' == tokens[index]:
-                    print(tokens)
-                    tokens.pop(index)
-                    print(tokens[index-1])
-                    tokens[index-1] = str(self.FloatDecimal(tokens[index-1]).float() / self.FloatDecimal(str(100)).float())
-                elif '!' == tokens[index]:
-                    tokens.pop(index)
-                    tokens[index-1] = str(factorial(int(self.FloatDecimal(tokens[index-1]).float())))
-                elif 'n' == tokens[index]:
-                    tokens.pop(index)
-                    tokens[index] = str(log(float(self.FloatDecimal(tokens[index]).float())))
-                    print(tokens, 67)
-                elif 'g' == tokens[index]:
-                    tokens.pop(index)
-                    print(tokens[index], 45)
-                    tokens[index] = str(log10(float(self.FloatDecimal(tokens[index]).float())))
-                elif 's' == tokens[index]:
-                    tokens.pop(index)
-                    tokens[index] = str(sqrt(float(self.FloatDecimal(tokens[index]).float())))
-                elif 'l' == tokens[index]:
-                    tokens.pop(index)
-                    if len(tokens) >= index+2:
-                        print(True)
-                        if tokens[t+1] == '|':
-                            tokens.pop(index+1)
-                            tokens[index] = str(log(float(self.FloatDecimal(tokens[index]).float()), float(self.FloatDecimal(tokens.pop(index+1) if len(tokens) >= t+2 else str(e)).float())))
-                        else:
-                            tokens[index] = str(log(float(self.FloatDecimal(tokens[index]).float())))
-
-                    else:
-                        print(False)
-                        tokens[index] = str(log(float(self.FloatDecimal(tokens[index]).float())))
-                    print(890)
-
-            return self._calculate_expression_base(tokens)
-        @threaded_class
-        class FloatDecimal:
-            def __init__(self, number: str):
-                print(number)
-                minus = False
-                if number.startswith('-'):
-                    number = number[1:]
-                    minus = True
-                value: Decimal
-                match number[:2]:
-                    case "0x":
-                        print(number, 17)
-                        value = Decimal(float.fromhex(number))
-                    case "0b":
-                        number = number[2:]
-                        integer_part, fractional_part = (number.split('.') if '.' in number else (number, ''))
-                        integer_value = int(integer_part, 2) if integer_part else 0
-                        fractional_value = sum(
-                            int(bit) * 2**(-i) for i, bit in enumerate(fractional_part, start=1)
-                        )
-                        value = Decimal(integer_value + fractional_value)
-                    case "0t":
-                        number = number[2:]
-                        integer_part, fractional_part = (number.split('.') if '.' in number else (number, ''))
-                        integer_value = int(integer_part, 8) if integer_part else 0
-                        fractional_value = sum(
-                            int(digit) * 8**(-i) for i, digit in enumerate(fractional_part, start=1)
-                        )
-                        value = Decimal(integer_value + fractional_value)
-                    case _:
-                        print(number[:2], "gh")
-                        value = Decimal(number)
-                print(15)
-                self.value = -value if minus else value
-            def float(self):
-                return self.value
-            def __str__(self):
-                print(str(self.value), 657)
-                return str(self.value)
 
 @threaded_class
 class Derivative(Calculate):
@@ -721,7 +354,12 @@ class Derivative(Calculate):
                 print(e)
                 traceback.print_exc()
                 self.result = "Error"
+    def __iter__(self: Self):
+        return iter(self.diff)
     def ordinar_derivate(self: Self, expression: list[Any]):
+        if expression[0] == []:
+            expression.pop(0)
+        print(len(expression), "er")
         match len(expression):
             case 1:
                 print(expression)
@@ -828,6 +466,9 @@ class Derivative(Calculate):
 
     def reverse_derivate(self: Self, expression: [list | str], const: bool = False):
         is_const: bool = False
+        if len(expression[0]) == 0:
+            expression.pop(0)
+        print(len(expression), "er")
         match len(expression):
             case 1:
                 print(19)
@@ -983,7 +624,6 @@ class Derivative(Calculate):
                             #raise NotImplementedError("Integration of non-integer powers requires advanced techniques.")
 
         return (expression, is_const) if const else expression
-
 
 
             
