@@ -61,6 +61,16 @@ class LogicCalculate():
     def button_other(self) -> None:
         print(3)
         window = self.window
+        print(
+            Calculate(self.line_edit_text) 
+            if window.inputtin != (1, 3) else 
+            Integral(
+                a = window.getResult(1, 1), 
+                b = window.getResult(1, 2), 
+                EPS = window.getResult(1, 0), 
+                equation = self.line_edit_text
+            )
+        )
         window.result = (
             result := str(
                 Calculate(self.line_edit_text) 

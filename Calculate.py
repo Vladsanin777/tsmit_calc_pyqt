@@ -38,11 +38,8 @@ class Debuger:
         Класс для обработки математических выражений: очистка, замена операторов и проверка скобок.
         """
         def __init__(self, expression: str):
-            if "^*" in expression:
-                raise Exception("Two operators in expression \"^*\"")
-            if "*^" in expression:
-                raise Exception("Two operators in expression \"*^\"")
 
+            expression = expression.replace("_E", str(e)).replace("_PI", str(pi))
             expression = expression.replace("**", "^").replace(":", "/").replace(",", ".").replace("//", "/").replace("--", "+")
             while "++" in expression:
                 expression = expression.replace("++", "+")
@@ -92,6 +89,8 @@ class SimpleExpression:
 
         # Создаём дерево выражения
         self.result = self._build_expression_tree(tokens)
+        if isinstance(self.result, str):
+            self.result = [self.result]
         print(self.result, "result")
     def __iter__(self):
         return iter(self.result)
@@ -132,7 +131,7 @@ class SimpleExpression:
             i = 0
             while i < len(tokens):
                 token = tokens[i]
-                if token.isdigit() or token == 'x':
+                if re.match(r'^\d+(\.\d+)?$', token) or token == 'x':
                     # Число или переменная
                     stack.append(token)
                 elif token in ['sin', 'cos', 'tan', 'cot', 'log', 'ln', 'lg', 'arcsin', 'arccos', 'arctan', 'arccot', 'arcsec', 'arccsc']:
@@ -195,6 +194,7 @@ class SimpleExpression:
         return parse_expression(tokens)
 
 
+
 class FloatDecimal:
     def __init__(self, number: str):
         print(number)
@@ -240,7 +240,6 @@ class Calculate:
     def __init__(self, expression: Union[str, None], expression_list: Union[List, None] = None):
         self.result = "0"
         try:
-            expression = expression.replace(" ", "")
             if expression:
                 expression = str(Debuger(expression))
                 self.expression = list(SimpleExpression(expression))
@@ -675,43 +674,3 @@ class Integral():
             self.replace_x(item, new_value) if isinstance(item, list) else new_value if item == 'x' else item
             for item in lst
         ]
-    """
-        self.__n =          2
-        self.__a =          Decimal(a)
-        self.__b =          Decimal(b)
-        self.__EPS =        Decimal(EPS)
-        self.__equation =   equation
-        self.__result = Decimal(0)
-        self.integral()
-        while (abs(self.__result - self.__new_result) >= self.__EPS):
-            print(self.__result, self.__new_result)
-            self.__n **=    2
-            self.__result = self.__new_result
-            self.integral()
-            print(abs(self.__result - self.__new_result))
-    def integral(self):
-        
-        # Grid spacing
-        h: Decimal = (self.__b - self.__a) / Decimal(self.__n)
-
-        
-        # Computing sum of first and last terms
-        # in above formula
-        s: Decimal = (
-            Calculate(self.__equation.replace('x', str(self.__a))).float() + 
-            Calculate(self.__equation.replace('x', str(self.__b))).float()
-        )
-
-        # Adding middle terms in above formula
-        i: Decimal = Decimal(1)
-        h_i: Decimal = Decimal(1)
-        while i < self.__n:
-            s += Decimal(2) * Calculate(self.__equation.replace('x', str(self.__a + i * h))).float()
-            i += h_i
-            
-        # h/2 indicates (b-a)/2n. 
-        # Multiplying h/2 with s.
-        self.__new_result = h / Decimal(2) * s
-    def __str__(self):
-        return str(self.__new_result)
-    """

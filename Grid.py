@@ -66,11 +66,6 @@ class GridBasicCalc(QGridLayout):
         window.line_edit = 0, line_edit
         self.addWidget(line_edit)
 
-class EpsIntegral(QHBoxLayout):
-    def __init__(self, button: ButtonBase, line_edit: LineEdit):
-        super().__init__()
-        self.addWidget(button)
-        self.addWidget(line_edit)
 
 class GridIntegralCalc(QGridLayout):
     def __init__(self, window):
@@ -81,18 +76,16 @@ class GridIntegralCalc(QGridLayout):
         local_histori = HistoriScroll()
         window.local_histori = local_histori
         self.addWidget(local_histori, 0, 0, 1, 6)
-        eps_line_edit = LineEdit(window, (1, 0))
-        window.line_edit = 1, eps_line_edit
-        self.addLayout(EpsIntegral(ButtonBase("EPS = ", css_name = "calculate", min_width = 92, max_width = 90, window = window), eps_line_edit), 1, 0, 1, 6)
-        self.addWidget(ButtonBase("a = ", css_name = "calculate", max_width = 45, window = window), 2, 0, 1, 1)
+
+        self.addWidget(ButtonBase("a = ", css_name = "calculate", max_width = 45, window = window), 1, 0, 1, 1)
         a_line_edit = LineEdit(window, (1, 1))
         window.line_edit = 1, a_line_edit
-        self.addWidget(a_line_edit, 2, 1, 1, 2)
-        self.addWidget(ButtonBase("b = ", css_name = "calculate", max_width = 45, window = window), 2, 3, 1, 1)
+        self.addWidget(a_line_edit, 1, 1, 1, 2)
+        self.addWidget(ButtonBase("b = ", css_name = "calculate", max_width = 45, window = window), 1, 3, 1, 1)
         b_line_edit = LineEdit(window, (1, 2))
         window.line_edit = 1, b_line_edit
-        self.addWidget(b_line_edit, 2, 4, 1, 2)
+        self.addWidget(b_line_edit, 1, 4, 1, 2)
         main_line_edit = LineEdit(window, (1, 3))
         window.line_edit = 1, main_line_edit
-        self.addWidget(main_line_edit, 3, 0, 1, 6)
+        self.addWidget(main_line_edit, 2, 0, 1, 6)
         

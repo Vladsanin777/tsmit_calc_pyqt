@@ -77,6 +77,9 @@ class Window(QWidget):
             ))
         )
         return
+    def local_histori_method(self, index):
+        print(self.__local_histori[index])
+        return self.__local_histori[index]
     @property
     def local_histori(self) -> HistoriScroll:
         return self.__local_histori[self.__inputtin[0]]
