@@ -299,9 +299,8 @@ class Calculate:
                             case "log":
                                 if isinstance(expression_1, list):
                                     func = lambda x: log(x, self.cash)
-                                    self.cash = float(expression_1[2])
+                                    self.cash = expression_1[2]
                                     expression_1 = expression_1[0]
-                                    print(expression_1, "expression_1")
                                 else:
                                     func = log
                             case _:
@@ -339,12 +338,7 @@ class Calculate:
                         result = expression_0_Decimal - expression_2_Decimal
                     case '^':
                         result = expression_0_Decimal ** expression_2_Decimal
-                    case '|':
-                        result = expression
-        if isinstance(result, list):
-            return result
-        else:
-            return str(result)
+        return str(result)
     def __str__(self: Self) -> str:
         return self.result
 
@@ -374,6 +368,9 @@ class Derivative(Calculate):
     def __iter__(self: Self):
         return iter(self.diff)
     def ordinar_derivate(self: Self, expression: list[Any]):
+        if expression[0] == []:
+            expression.pop(0)
+        print(len(expression), "er")
         match len(expression):
             case 1:
                 print(expression)
@@ -475,7 +472,6 @@ class Derivative(Calculate):
                             self.ordinar_derivate(expression_0)
                         ]
                     case "|":
-                        print(expression, 917)
                         ...
                         
 
