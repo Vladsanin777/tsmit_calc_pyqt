@@ -29,6 +29,8 @@ def threaded_class(cls):
             self._thread.join()
         def __str__(self):
             return str(self._instance)
+        def __iter__(self):
+            return iter(self._instance)
     return ThreadedClass
 
 class Debuger:
@@ -94,61 +96,33 @@ class SimpleExpression:
     def __iter__(self):
         return iter(self.result)
 
-    def _parse_expression(self, expression: str) -> List[str]:
+
+
+    def tokenize_expression(self: Self, expression: str) -> List[str]:
         """
-        Разбирает строку выражения на числа, операторы и функции.
-        :param expression: Строка математического выражения
-        :return: Список токенов
+        Разбивает строку выражения на токены, включая числа, операторы и функции.
         """
-        tokens = findall(r'\d+\.\d+|\d+|[+\-*/^()]|sin|cos|tan|cot|log|ln|lg', expression)
+        # Регулярные выражения для чисел, операторов, и функций
+        token_pattern = re.compile(r'(\d+\.\d+|\d+|[a-zA-Z]+|[-+*/^()=]|x)')
+
+        # Используем регулярное выражение для разбиения строки
+        tokens = token_pattern.findall(expression)
+
+        # Преобразуем токены в строковый список
         return tokens
-
-    def _process_brackets(self) -> None:
-        """
-        Обрабатывает круглые скобки, преобразуя их содержимое в отдельные вложенные списки.
-        """
-        stack = []
-        for i, token in enumerate(self.result):
-            if token == '(':
-                stack.append(i)
-            elif token == ')':
-                if not stack:
-                    raise ValueError("Unmatched closing bracket")
-                start = stack.pop()
-                sub_expression = self.result[start + 1:i]
-                self.result = self.result[:start] + [sub_expression] + self.result[i + 1:]
-        if stack:
-            raise ValueError("Unmatched opening bracket")
-
-    def tokenize_expression(self, expression: str) -> List[str]:
-        """
-        Разбивает строку выражения на токены.
-        """
-        functions = [
-            'arcsin', 'arccos', 'arctan', 'arccot', 'arcsec', 'arccsc',
-            'sin', 'cos', 'tan', 'cot', 'log', 'ln', 'lg'
-        ]
-        token_pattern = (
-            r"(" +
-            r"|".join(re.escape(func) for func in functions) +  # Функции
-            r"|[+\-*/^()]" +                                     # Операторы и скобки
-            r"|[0-9]+(?:\.[0-9]*)?(?:[eE][+-]?[0-9]+)?" +        # Числа
-            r"|[^a-zA-Z0-9\s]" +                                 # Остальные символы
-            r")"
-        )
-        return re.findall(token_pattern, expression)
 
     def _build_expression_tree(self, tokens: List[str]) -> Union[str, List]:
         """
         Рекурсивно строит дерево выражения из токенов.
         """
+        print(tokens, "tokens")
         def parse_expression(tokens: List[str]) -> List:
             stack = []  # Стек для хранения выражений
             operators = []  # Стек операторов
-
             def apply_operator():
                 # Применяет оператор к верхним элементам стека
                 operator = operators.pop()
+                print(stack, "stack")
                 right = stack.pop()
                 left = stack.pop()
                 stack.append([left, operator, right])
@@ -157,11 +131,11 @@ class SimpleExpression:
             i = 0
             while i < len(tokens):
                 token = tokens[i]
-                if token.isdigit() or re.match(r"^[a-zA-Z]", token):
+                if token.isdigit() or token == 'x' or re.match(r"^[a-zA-Z]", token):
                     # Число или функция
                     if token in ['sin', 'cos', 'tan', 'cot', 'log', 'ln', 'lg', 'arcsin', 'arccos', 'arctan', 'arccot', 'arcsec', 'arccsc']:
                         # Проверяем, есть ли аргумент функции (например, sin1)
-                        if i + 1 < len(tokens) and tokens[i + 1].isdigit():
+                        if i + 1 < len(tokens) and (tokens[i + 1].isdigit() or tokens[i + 1] == 'x'):
                             stack.append([token, tokens[i + 1]])
                             i += 1  # Пропускаем число, так как оно уже добавлено
                         else:
@@ -241,24 +215,25 @@ class FloatDecimal:
 class Calculate:
     result: str
     expression: list[Any]
-    def __init__(self, expression):
-        expression = expression.replace(" ", "")
-        if expression == "": self.result = "0"
-        else:
-            try:
+    def __init__(self, expression: Union[str, None], expression_list: Union[List, None] = None):
+        
+        try:
+            if expression:
+                expression = expression.replace(" ", "")
+                if expression == "": self.result = "0"
                 expression = str(Debuger(expression))
                 self.expression = list(SimpleExpression(expression))
                 print(self.expression)
                 self.result = self.calc(self.expression)
-            except Exception as e:
-                print(e)
-                traceback.print_exc()
-                self.result = "Error"
+            elif expression_list:
+                self.expression = expression_list
+                self.result = self.calc(self.expression)
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+            self.result = "Error"
     def calc(self: Self, expression: list[Any]):
         result: str = "Error"
-        if expression[0] == []:
-            expression.pop(0)
-        print(len(expression), "er")
         print(expression)
         match len(expression):
             case 1:
@@ -346,10 +321,11 @@ class Derivative(Calculate):
             try:
                 expression = str(Debuger(expression))
                 self.expression = list(SimpleExpression(expression))
+                print(self.expression, 61)
                 derivate = self.reverse_derivate if reverse_derivate else self.ordinar_derivate
                 print(self.expression, 61)
                 self.diff = derivate(self.expression)
-                print(self.diff)
+    
             except Exception as e:
                 print(e)
                 traceback.print_exc()
@@ -637,13 +613,27 @@ class Integral():
     __b:          Decimal
     __n:          int
     __EPS:        Decimal
-    __result:     Decimal
+    __result:     str
     __equation:   str
     __new_result: Decimal
     def __init__(self, *, a: str, b: str, EPS: str, equation: str):
-        Derivative(equation, True)
+        try:
+            lst = list(Derivative(equation, True))
+            self.__result = str(
+                Decimal(str(Calculate(None, self.replace_x(lst, b)))) - 
+                Decimal(str(Calculate(None, self.replace_x(lst, a))))
+            )
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+            self.__result = "Error"
     def __str__(self):
-        return "0"
+        return self.__result
+    def replace_x(self: Self, lst: list, new_value: str):
+        return [
+            self.replace_x(item, new_value) if isinstance(item, list) else new_value if item == 'x' else item
+            for item in lst
+        ]
     """
         self.__n =          2
         self.__a =          Decimal(a)
