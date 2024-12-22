@@ -4,6 +4,7 @@ from CreateHistori import HistoriScroll
 from LineEdit import LineEdit
 from LogicButton import LogicCalculate
 from UI import CreateGradient
+from typing import Self
 
 class BuildingGridKeybord():
     def __init__(self, list_button: list[list[str]], grid: QGridLayout, window, row: int = 0, *, button = ButtonDrag):
@@ -88,4 +89,18 @@ class GridIntegralCalc(QGridLayout):
         main_line_edit = LineEdit(window, (1, 3))
         window.line_edit = 1, main_line_edit
         self.addWidget(main_line_edit, 2, 0, 1, 6)
-        
+
+class GridDerivateCalc(QGridLayout):
+    def __init__(self: Self, window):
+        super().__init__()
+        self.setSpacing(0)
+        self.setContentsMargins(0, 0, 0, 0)
+        local_histori = HistoriScroll()
+        window.local_histori = local_histori
+        self.addWidget(local_histori, 0, 0, 1, 6)
+        ordinar_derivate_line_edit = LineEdit(window, (2, 1))
+        window.line_edit = 2, ordinar_derivate_line_edit
+        self.addWidget(ordinar_derivate_line_edit, 1, 0, 1, 6)
+        ordinar_derivate_line_edit = LineEdit(window, (2, 1))
+        window.line_edit = 2, ordinar_derivate_line_edit
+        self.addWidget(ordinar_derivate_line_edit, 2, 0, 1, 6)

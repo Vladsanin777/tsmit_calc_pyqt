@@ -51,7 +51,7 @@ class Window(QWidget):
         self.__add_local_histori = list()
         self.__resize_local_histori = list()
         self.__local_histori = list()
-        self.__line_edit = [[], []]
+        self.__line_edit = [[], [], []]
         self.__inputtin = 0, 0
         self.__result = [["0"], ["0", "0", "0", "0"]]
         super().__init__()

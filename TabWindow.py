@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import QDrag, QPainter, QLinearGradient, QFont, QBrush, QTextOption, QColor, QFontMetrics, QPainterPath, QPen
 from PyQt6.QtCore import Qt
 from Grid import (
-    GridCalculateKeybord, GridBasicCalc, GridIntegralCalc
+    GridCalculateKeybord, GridBasicCalc, GridIntegralCalc, GridDerivateCalc
 )
 from UI import CreateGradient
 
@@ -103,15 +103,9 @@ class MainTabWidget(QTabWidget):
         self.setTabBar(self.tab_bar)  # Устанавливаем кастомный TabBar
         self.addTab(TabQWidget(GridBasicCalc(window)), "Basic")
         self.addTab(TabQWidget(GridIntegralCalc(window)), "Integral")
-        self.addTab(TabQWidget(QGridLayout()), "Tab 3")
+        self.addTab(TabQWidget(GridDerivateCalc(window)), "Derivate")
         self.addTab(TabQWidget(QGridLayout()), "Tab 4")
         self.window = window
 
     def paintEvent(self, event):
         self.tab_bar.set_style()
-    """
-    def set_style(self):
-        print(3)
-        self.setTabBar(CustomTabBar(self, self.window))  # Устанавливаем кастомный TabBar
-        self.tabBar().show()
-   """ 
