@@ -18,6 +18,8 @@ from UI import CreateGradient
 
 from LineEdit import LineEdit
 
+from typing import Self
+
 # Main Content
 class MainLayout(QVBoxLayout):
     def __init__(self, window):
@@ -53,7 +55,7 @@ class Window(QWidget):
         self.__local_histori = list()
         self.__line_edit = [[], [], []]
         self.__inputtin = 0, 0
-        self.__result = [["0"], ["0", "0", "0", "0"]]
+        self.__result = [["0"], ["0", "0", "0", "0"], ["0", "0"]]
         super().__init__()
         self.setLayout(MainLayout(self))
         self.setWindowTitle("Calculate")
@@ -144,6 +146,9 @@ class Window(QWidget):
                 isinstance(value[0], int) and isinstance(value[1], LineEdit):
             self.__line_edit[value[0]].append(value[1])
         return
+    def getLineEdit(self: Self, tab: int, line_edit: int) -> LineEdit:
+        if isinstance(tab, int) and isinstance(line_edit, int):
+            return self.__line_edit[tab][line_edit]
     @property
     def result(self) -> str:
         return self.__result[self.__inputtin[0]][self.__inputtin[1]]

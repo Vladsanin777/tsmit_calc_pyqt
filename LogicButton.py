@@ -1,4 +1,4 @@
-from Calculate import Calculate, Integral 
+from Calculate import Calculate, Integral, Derivative
 from NewHistoriElement import BoxHistoriElement
 class LogicCalculate():
     entry_text: str = ""
@@ -61,29 +61,26 @@ class LogicCalculate():
     def button_other(self) -> None:
         print(3)
         window = self.window
-        print(
-            Calculate(self.line_edit_text) 
-            if window.inputtin != (1, 3) else 
-            Integral(
-                a = window.getResult(1, 1), 
-                b = window.getResult(1, 2), 
-                EPS = window.getResult(1, 0), 
-                equation = self.line_edit_text
-            )
-        )
-        window.result = (
-            result := str(
-                Calculate(self.line_edit_text) 
-                if window.inputtin != (1, 3) else 
-                Integral(
+        
+        match window.inputtin:
+            case (1, 3): 
+                result = Integral(
                     a = window.getResult(1, 1), 
                     b = window.getResult(1, 2), 
                     EPS = window.getResult(1, 0), 
                     equation = self.line_edit_text
                 )
-            )
-        )
-        window.set_for_result.setText(result)
+            case (2, 0):
+                result = Derivative(self.line_edit_text, True)
+                print(result, "tyui")
+                window.getLineEdit(2, 1).setText(str(result))
+            case (2, 1):
+                result = Derivative(self.line_edit_text)
+                #window.getLineEdit(2, 0).setText(str(result))
+            case _:
+                result = Calculate(self.line_edit_text) 
+        window.result = str(result)
+        window.set_for_result.setText(window.result)
     
     @staticmethod
     def inputing_line_edit(button, window) -> None:

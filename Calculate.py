@@ -352,7 +352,7 @@ class Calculate:
 class Derivative(Calculate):
     result: str
     expression: list[Any] 
-    diff: list[Any]
+    diff: Union[List, str]
     def __init__(self: Self, expression: str, reverse_derivate: bool = False) -> Self:
         print("reverse_derivate", reverse_derivate)
         expression = expression.replace(" ", "")
@@ -370,8 +370,11 @@ class Derivative(Calculate):
                 print(e)
                 traceback.print_exc()
                 self.result = "Error"
+                self.diff = "Error"
     def __iter__(self: Self):
         return iter(self.diff)
+    def __str__(self: Self):
+        return str(self.diff)
     def ordinar_derivate(self: Self, expression: list[Any]):
         match len(expression):
             case 1:
