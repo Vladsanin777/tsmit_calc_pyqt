@@ -48,8 +48,9 @@ class Window(QWidget):
     __line_edit: list[list[LineEdit]]
     __inputtin: tuple[int, int]
     __result: list[list[str]]
-    def __init__(self):
-        
+    __fix_not_re_differentiation: bool
+    def __init__(self: Self) -> Self:
+        self.__fix_not_re_differentiation = True
         self.__add_local_histori = list()
         self.__resize_local_histori = list()
         self.__local_histori = list()
@@ -169,4 +170,11 @@ class Window(QWidget):
         if isinstance(value, tuple) and isinstance(value[0], int) and isinstance(value[1], int):
             self.__inputtin = value
         return
-
+    @property
+    def fix_not_re_differentiation(self: Self) -> bool:
+        return self.__fix_not_re_differentiation
+    @fix_not_re_differentiation.setter
+    def fix_not_re_differentiation(self: Self, new_value) -> None:
+        if isinstance(new_value, bool):
+            self.__fix_not_re_differentiation = new_value
+        return

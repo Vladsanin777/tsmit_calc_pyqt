@@ -60,6 +60,7 @@ class LogicCalculate():
             
     def button_other(self) -> None:
         print(3)
+        result: Union[Calculate, Derivative, Integral] = None
         window = self.window
         print(str(window.inputtin), "op")
         match str(window.inputtin):
@@ -71,16 +72,25 @@ class LogicCalculate():
                     equation = self.line_edit_text
                 )
             case "(2, 0)":
-                result = Derivative(self.line_edit_text, True)
-                print(iter(result), "tyui")
-                window.getLineEdit(2, 1).setText(str(result))
+                if self.window.fix_not_re_differentiation:
+                    result = Derivative(self.line_edit_text, True)
+                    print(str(result), "tyui")
+                    window.getLineEdit(2, 1).setText(str(result))
+                    self.window.fix_not_re_differentiation = False
+                else:
+                    self.window.fix_not_re_differentiation = True
             case "(2, 1)":
-                result = Derivative(self.line_edit_text)
-                window.getLineEdit(2, 0).setText(str(result))
+                if self.window.fix_not_re_differentiation:
+                    result = Derivative(self.line_edit_text)
+                    window.getLineEdit(2, 0).setText(str(result))
+                    self.window.fix_not_re_differentiation = False
+                else:
+                    self.window.fix_not_re_differentiation = True
             case _:
                 result = Calculate(self.line_edit_text) 
-        window.result = str(result)
-        window.set_for_result.setText(window.result)
+        if not self.window.fix_not_re_differentiation:
+            window.result = str(result)
+            window.set_for_result.setText(window.result)
     
     @staticmethod
     def inputing_line_edit(button, window) -> None:
