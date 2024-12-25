@@ -59,38 +59,38 @@ class LogicCalculate():
             self.window.line_edit.setText(self.line_edit_text[:element_position] + self.line_edit_text[element_position+3:])
             
     def button_other(self) -> None:
+        print(self.line_edit_text, 'line_edit_text')
         print(3)
-        result: Union[Calculate, Derivative, Integral] = None
         window = self.window
+        result: Union[Calculate, Derivative, Integral, str] = window.result
         print(str(window.inputtin), "op")
-        match str(window.inputtin):
-            case "(1, 3)": 
-                result = Integral(
-                    a = window.getResult(1, 1), 
-                    b = window.getResult(1, 2), 
-                    EPS = window.getResult(1, 0), 
-                    equation = self.line_edit_text
+        match window.inputtin:
+            case (1, 3): 
+                window.result = str(
+                    Integral(
+                        a = window.getResult(1, 1), 
+                        b = window.getResult(1, 2), 
+                        EPS = window.getResult(1, 0), 
+                        equation = self.line_edit_text
+                    )
                 )
-            case "(2, 0)":
+            case (2, 0):
                 if self.window.fix_not_re_differentiation:
-                    result = Derivative(self.line_edit_text, True)
-                    print(str(result), "tyui")
-                    window.getLineEdit(2, 1).setText(str(result))
+                    window.result = str(Derivative(self.line_edit_text, True))
+                    window.getLineEdit(2, 1).setText(window.result)
                     self.window.fix_not_re_differentiation = False
                 else:
                     self.window.fix_not_re_differentiation = True
-            case "(2, 1)":
+            case (2, 1):
                 if self.window.fix_not_re_differentiation:
-                    result = Derivative(self.line_edit_text)
-                    window.getLineEdit(2, 0).setText(str(result))
+                    window.result = str(Derivative(self.line_edit_text))
+                    window.getLineEdit(2, 0).setText(window.result)
                     self.window.fix_not_re_differentiation = False
                 else:
                     self.window.fix_not_re_differentiation = True
             case _:
-                result = Calculate(self.line_edit_text) 
-        if not self.window.fix_not_re_differentiation:
-            window.result = str(result)
-            window.set_for_result.setText(window.result)
+                window.result = str(Calculate(self.line_edit_text))
+        window.set_for_result.setText(window.result)
     
     @staticmethod
     def inputing_line_edit(button, window) -> None:

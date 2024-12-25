@@ -100,9 +100,11 @@ class SimpleExpression:
     def tokenize_expression(self: Self, expression: str) -> List[str]:
         """
         Разбивает строку выражения на токены, включая числа, операторы и функции.
+        Если после операторов /, *, ^, +, -, mod, | или перед ним ( идёт знак '-',
+        он объединяется с числом. Также учитывается, если выражение начинается с '-'.
         """
-        # Регулярные выражения для чисел, операторов, и функций
-        token_pattern = re.compile(r'(\d+\.\d+|\d+|[a-zA-Z]+|[-+*/^|()=]|x)')
+        # Регулярное выражение для чисел, операторов и функций
+        token_pattern = re.compile(r'(\d+\.\d+|\d+|[a-zA-Z]+|[-+*/^|()=]|x|mod|-\d+(?:\.\d+)?)')
 
         # Используем регулярное выражение для разбиения строки
         tokens = token_pattern.findall(expression)
@@ -121,11 +123,23 @@ class SimpleExpression:
             def apply_operator():
                 # Применяет оператор к верхним элементам стека
                 if len(stack) < 2:
-                    raise ValueError(f"Недостаточно операндов для оператора '{operators[-1]}'. Текущий стек: {stack}")
-                operator = operators.pop()
-                right = stack.pop()
-                left = stack.pop()
-                stack.append([left, operator, right])
+                    if operators[-1] == '-':
+                        operators.pop()
+                        def add_minus(x):
+                            if isinstance(x, list):
+                                x[0] = add_minus(x[0])
+                                return x
+                            else:
+                                return '-' + x
+                        stack.append(add_minus(stack.pop()))
+                        
+                    else:
+                        raise ValueError(f"Недостаточно операндов для оператора '{operators[-1]}'. Текущий стек: {stack}")
+                else:
+                    operator = operators.pop()
+                    right = stack.pop()
+                    left = stack.pop()
+                    stack.append([left, operator, right])
 
             precedence = {'|': 0, '+': 1, '-': 1, '*': 2, '/': 2, '^': 3}
             i = 0
@@ -134,7 +148,7 @@ class SimpleExpression:
                 if re.match(r'^\d+(\.\d+)?$', token) or token == 'x':
                     # Число или переменная
                     stack.append(token)
-                elif token in ['sin', 'cos', 'tan', 'cot', 'log', 'ln', 'lg', 'arcsin', 'arccos', 'arctan', 'arccot', 'arcsec', 'arccsc', 'ln', 'log', 'lg']:
+                elif token in ['sin', 'cos', 'tan', 'cot', 'log', 'ln', 'lg', 'arcsin', 'arccos', 'arctan', 'arccot', 'arcsec', 'arccsc', 'ln', 'log', 'lg', 'sgn', 'abs', 'mod']:
                     # Функция
                     if i + 1 < len(tokens) and tokens[i + 1] == '(':
                         # Найти соответствующую закрывающую скобку
@@ -303,6 +317,11 @@ class Calculate:
                                     print(expression_1, "expression_1")
                                 else:
                                     func = log
+                            case "abs":
+                                func = abs
+                            case "sgn":
+                                print('sgn')
+                                func = lambda x: 1 if x > 0 else -1 if x < 0 else 0 
                             case _:
                                 match expression[0][-2:]:
                                     case "ln":
@@ -340,6 +359,8 @@ class Calculate:
                         result = expression_0_Decimal ** expression_2_Decimal
                     case '|':
                         result = expression
+                    case 'mod':
+                        result = expression_0_Decimal % expression_2_Decimal
         if isinstance(result, list):
             return result
         else:
@@ -387,38 +408,86 @@ class Derivative(Calculate):
                 if expression[1][0] in "0123456789":
                     expression = '0'
                 else:
-                    expression_1: [str | list] = expression[1]
+                    expression_0: str
+                    expression_1: Union[str, list] = expression[1]
                     complex_expression: bool = isinstance(expression_1, list)
-                    raising_to_a_power: bool = False
-                    sec_or_csc: bool = False
                     is_minus: bool = expression[0][0] == '-'
-                    match expression[0][-3:]:
-                        case 'sin':
-                            expression = '-cos' if is_minus else 'cos'
-                        case 'cos':
-                            expression = 'sin' if is_minus else '-sin'
-                        case 'tan':
-                            expression = '-sec' if is_minus else 'sec'
-                            raising_to_a_power = True
-                        case 'cot':
-                            expression = 'csc' if is_minus else '-csc'
-                            raising_to_a_power = True
-                        case 'sec': 
-                            expression = [['-sec' if is_minus else 'sec', expression_1], '*', ['tan', expression_1]]
-                            sec_or_csc = True
-                        case 'csc':
-                            expression = [['csc' if is_minus else '-csc', expression_1], '*', ['cot', expression_1]]
-                            sec_or_csc = True
-                    if not sec_or_csc:
-                        expression = [expression, expression_1]
-                        if raising_to_a_power:
-                            expression = [expression, '^', '2']
-                    if complex_expression:
-                        expression = [expression, '*', self.ordinar_derivate(expression_1)]
+                    match expression_0[-6:]:
+                        case 'arcsin':
+                            expression = [
+                                    '1', '/', ['sqrt', ['1', '-',
+                                    [expression_1, '^', '2']]]]
+                        case 'arccos':
+                            expression = [
+                                    '-1', '/', ['sqrt', ['1', '-', 
+                                    [expression_1, '^', '2']]]]
+                        case 'arctan':
+                            expression = [
+                                    '1', '/', ['sqrt', ['1', '+',
+                                    [expression_1, '^', '2']]]]
+                        case 'arccot':
+                            expression = [
+                                    '-1', '/', ['sqrt', ['1', '+', 
+                                    [expression_1, '^', '2']]]]
+                        case 'arcsec':
+                            expression = [
+                                    '1', '/', [['abs', expression_1],
+                                    '*', ['sqrt', ['1', '-',
+                                    [expression_1, '^', '2']]]]]
+                        case 'arccsc':
+                            expression = [
+                                    '-1', '/', [['abs', expression_1],
+                                    '*', ['sqrt', ['1', '-',
+                                    [expression_1, '^', '2']]]]]
+                        case _:
+                            match expression_0[-3:]:
+                                case 'sin':
+                                    expression = [
+                                        '-cos' if is_minus else 'cos', 
+                                        expression_1
+                                    ]
+                                case 'cos':
+                                    expression = [
+                                        'sin' if is_minus else '-sin',
+                                        expression_1
+                                    ]
+                                case 'tan':
+                                    expression = [
+                                        [
+                                            '-sec' if is_minus else 'sec',
+                                            expression_1
+                                        ], '^', '2']
+                                case 'cot':
+                                    expression = [
+                                        [
+                                            'csc' if is_minus else '-csc',
+                                            expression_1
+                                        ], '^', '2']
+                                case 'sec': 
+                                    expression = [
+                                        [
+                                            '-sec' if is_minus else 'sec',
+                                            expression_1
+                                        ],
+                                        '*',
+                                        ['tan', expression_1]
+                                    ]
+                                case 'csc':
+                                    expression = [
+                                        [
+                                            'csc' if is_minus else '-csc',
+                                            expression_1
+                                        ],
+                                        '*',
+                                        ['cot', expression_1]
+                                    ]
+                                case 'abs':
+                                    expression = ['sgn', expression_1]
+                    expression = [expression, '*', self.ordinar_derivate(expression_1)]
 
             case 3:
-                expression_0: [str | list] = expression[0]
-                expression_2: [str | list] = expression[2]
+                expression_0: Union[str, list] = expression[0]
+                expression_2: Union[str, list] = expression[2]
                 match expression[1]:
                     case "+" | "-":
                         expression = [
