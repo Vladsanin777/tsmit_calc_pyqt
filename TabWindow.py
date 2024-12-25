@@ -1,12 +1,23 @@
 from PyQt6.QtWidgets import (
-    QWidget, QTabWidget, QGridLayout, QTabBar
+    QWidget, QTabWidget, QGridLayout, 
+    QTabBar, QStackedWidget, QVBoxLayout
 )
-from PyQt6.QtGui import QDrag, QPainter, QLinearGradient, QFont, QBrush, QTextOption, QColor, QFontMetrics, QPainterPath, QPen
-from PyQt6.QtCore import Qt
+from PyQt6.QtGui import (
+    QDrag, QPainter, QLinearGradient,
+    QFont, QBrush, QTextOption, 
+    QColor, QFontMetrics, QPainterPath, 
+    QPen
+)
+from PyQt6.QtCore import (
+    Qt, QPropertyAnimation, QRect
+)
 from Grid import (
-    GridCalculateKeybord, GridBasicCalc, GridIntegralCalc, GridDerivateCalc
+    GridCalculateKeybord, GridBasicCalc, 
+    GridIntegralCalc, GridDerivativeCalc
 )
 from UI import CreateGradient
+
+from typing import Self
 
 
 
@@ -71,12 +82,12 @@ class CustomTabBar(QTabBar):
 
 
 class TabQWidget(QWidget):
-    def __init__(self, tab):
+    def __init__(self: Self, tab) -> Self:
         super().__init__()
         self.setLayout(tab)
 
-class TabWidgetKeybord(QTabWidget):
-    def __init__(self, window):
+class TabWidgetKeyboard(QTabWidget):
+    def __init__(self: Self, window):
         self.window = window
         super().__init__()
         #self.tabBar().setExpanding(True)
@@ -86,9 +97,10 @@ class TabWidgetKeybord(QTabWidget):
         self.addTab(TabQWidget(GridCalculateKeybord([["A", "B", "C"], ["D", "E", "F"]], window)), "digits 16")
         self.addTab(TabQWidget(GridCalculateKeybord([["+", "-", ":", "*", "^"], ["!", "sqrt", "ln", "log", "lg"]], window)), "operators")
         self.addTab(TabQWidget(GridCalculateKeybord([["_E", "_PI"]], window)), "consts")
+        self.addTab(TabQWidget(GridCalculateKeybord([["sin(", "cos(", "tan("], ["sec(", "csc(", "cot("]], window)), "trigonometric functions")
         self.addTab(TabQWidget(GridCalculateKeybord([["0x", "0b", "0t"]], window)), "number system")
         self.addTab(TabQWidget(GridCalculateKeybord([["%", "mod", ".", "|"]], window)), "other")
-    def paintEvent(self, event):
+    def paintEvent(self, event) -> None:
         self.tab_bar.set_style()
 
 
@@ -96,16 +108,16 @@ class TabWidgetKeybord(QTabWidget):
 #Main TabWidget
 
 class MainTabWidget(QTabWidget):
-    def __init__(self, window):
+    def __init__(self: Self, window) -> Self:
         super().__init__()
         #self.tabBar().setExpanding(True)
         self.tab_bar = CustomTabBar(self, window)
         self.setTabBar(self.tab_bar)  # Устанавливаем кастомный TabBar
         self.addTab(TabQWidget(GridBasicCalc(window)), "Basic")
         self.addTab(TabQWidget(GridIntegralCalc(window)), "Integral")
-        self.addTab(TabQWidget(GridDerivateCalc(window)), "Derivate")
+        self.addTab(TabQWidget(GridDerivativeCalc(window)), "Derivate")
         self.addTab(TabQWidget(QGridLayout()), "Tab 4")
         self.window = window
 
-    def paintEvent(self, event):
+    def paintEvent(self: Self, event):
         self.tab_bar.set_style()

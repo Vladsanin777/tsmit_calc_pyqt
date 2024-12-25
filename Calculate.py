@@ -134,7 +134,7 @@ class SimpleExpression:
                 if re.match(r'^\d+(\.\d+)?$', token) or token == 'x':
                     # Число или переменная
                     stack.append(token)
-                elif token in ['sin', 'cos', 'tan', 'cot', 'log', 'ln', 'lg', 'arcsin', 'arccos', 'arctan', 'arccot', 'arcsec', 'arccsc']:
+                elif token in ['sin', 'cos', 'tan', 'cot', 'log', 'ln', 'lg', 'arcsin', 'arccos', 'arctan', 'arccot', 'arcsec', 'arccsc', 'ln', 'log', 'lg']:
                     # Функция
                     if i + 1 < len(tokens) and tokens[i + 1] == '(':
                         # Найти соответствующую закрывающую скобку

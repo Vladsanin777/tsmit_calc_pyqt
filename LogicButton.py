@@ -61,22 +61,22 @@ class LogicCalculate():
     def button_other(self) -> None:
         print(3)
         window = self.window
-        
-        match window.inputtin:
-            case (1, 3): 
+        print(str(window.inputtin), "op")
+        match str(window.inputtin):
+            case "(1, 3)": 
                 result = Integral(
                     a = window.getResult(1, 1), 
                     b = window.getResult(1, 2), 
                     EPS = window.getResult(1, 0), 
                     equation = self.line_edit_text
                 )
-            case (2, 0):
+            case "(2, 0)":
                 result = Derivative(self.line_edit_text, True)
-                print(result, "tyui")
+                print(iter(result), "tyui")
                 window.getLineEdit(2, 1).setText(str(result))
-            case (2, 1):
+            case "(2, 1)":
                 result = Derivative(self.line_edit_text)
-                #window.getLineEdit(2, 0).setText(str(result))
+                window.getLineEdit(2, 0).setText(str(result))
             case _:
                 result = Calculate(self.line_edit_text) 
         window.result = str(result)

@@ -90,7 +90,7 @@ class GridIntegralCalc(QGridLayout):
         window.line_edit = 1, main_line_edit
         self.addWidget(main_line_edit, 2, 0, 1, 6)
 
-class GridDerivateCalc(QGridLayout):
+class GridDerivativeCalc(QGridLayout):
     def __init__(self: Self, window):
         super().__init__()
         self.setSpacing(0)
@@ -98,7 +98,7 @@ class GridDerivateCalc(QGridLayout):
         local_histori = HistoriScroll()
         window.local_histori = local_histori
         self.addWidget(local_histori, 0, 0, 1, 6)
-        ordinar_derivate_line_edit = LineEdit(window, (2, 1))
+        ordinar_derivate_line_edit = LineEdit(window, (2, 0))
         window.line_edit = 2, ordinar_derivate_line_edit
         self.addWidget(ordinar_derivate_line_edit, 1, 0, 1, 6)
         ordinar_derivate_line_edit = LineEdit(window, (2, 1))

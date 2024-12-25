@@ -9,7 +9,7 @@ from CreateHistori import (
     HistoriScroll, HistoriWidget, HistoriVBox
 )
 from TabWindow import (
-    MainTabWidget, TabWidgetKeybord
+    MainTabWidget, TabWidgetKeyboard
 )
 from Grid import (
     GridCalculateKeybord, GridCalculateCommon
@@ -33,7 +33,7 @@ class MainLayout(QVBoxLayout):
         self.addWidget(window.global_histori)
         self.addWidget(MainTabWidget(window))
         self.addLayout(GridCalculateCommon(window))
-        self.addWidget(TabWidgetKeybord(window))
+        self.addWidget(TabWidgetKeyboard(window))
         
 # Window
 class Window(QWidget):
