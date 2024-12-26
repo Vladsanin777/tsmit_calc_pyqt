@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import (
     QWidget, QTabWidget, QGridLayout, 
-    QTabBar, QStackedWidget, QVBoxLayout
+    QTabBar, QStackedWidget, QVBoxLayout,
+    QSizePolicy
 )
 from PyQt6.QtGui import (
     QDrag, QPainter, QLinearGradient,
@@ -12,8 +13,8 @@ from PyQt6.QtCore import (
     Qt, QPropertyAnimation, QRect
 )
 from Grid import (
-    GridCalculateKeybord, GridBasicCalc, 
-    GridIntegralCalc, GridDerivativeCalc
+    GridCalculateKeybord, GridBasicCalc, GridReplacementCalc,
+    GridIntegralCalc, GridDerivativeOrIntegrateCalc
 )
 from UI import CreateGradient
 
@@ -85,12 +86,11 @@ class TabQWidget(QWidget):
     def __init__(self: Self, tab) -> Self:
         super().__init__()
         self.setLayout(tab)
-
 class TabWidgetKeyboard(QTabWidget):
     def __init__(self: Self, window):
         self.window = window
         super().__init__()
-        #self.tabBar().setExpanding(True)
+        self.setFixedHeight(110)
         self.tab_bar = CustomTabBar(self, window)
         self.setTabBar(self.tab_bar)  # Устанавливаем кастомный TabBar
         self.addTab(TabQWidget(GridCalculateKeybord([["1", "2", "3", "4", "5"], ["6", "7", "8", "9", "0"]], window)), "digits 10")
@@ -116,8 +116,9 @@ class MainTabWidget(QTabWidget):
         self.setTabBar(self.tab_bar)  # Устанавливаем кастомный TabBar
         self.addTab(TabQWidget(GridBasicCalc(window)), "Basic")
         self.addTab(TabQWidget(GridIntegralCalc(window)), "Integral")
-        self.addTab(TabQWidget(GridDerivativeCalc(window)), "Derivate")
-        self.addTab(TabQWidget(QGridLayout()), "Tab 4")
+        self.addTab(TabQWidget(GridDerivativeOrIntegrateCalc(window, 2)), "Derivative")
+        self.addTab(TabQWidget(GridDerivativeOrIntegrateCalc(window, 3)), "Integrate")
+        self.addTab(TabQWidget(GridReplacementCalc(window)), "Replacement")
         self.window = window
 
     def paintEvent(self: Self, event):

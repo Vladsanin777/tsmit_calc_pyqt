@@ -43,64 +43,66 @@ class GridCalculateCommon(QGridLayout):
             ["7", "8", "9", ":", "sqrt"], 
             ["4", "5", "6", "*", "^"], 
             ["1", "2", "3", "-", "!"], 
-            ["0", ".", "%", "+", "_E"]
+            ["0", ".", "%", "+", "_E"],
+            ["", "", "", "", ""]
         ], self, window, 1, button = ButtonDragAndDrop)
         window.set_for_result = ButtonDrag(window.result[0][0], window = window)
-        self.addWidget(window.set_for_result, 6, 0, 1, 2) 
-        self.button("", 6, 2, button = ButtonDragAndDrop)
-        self.button("", 6, 3, button = ButtonDragAndDrop)
-        self.button("=", 6, 4)
+        self.addWidget(window.set_for_result, 7, 0, 1, 5) 
 
     def button(self, label: str, row: int, column: int, *, button = ButtonDrag) -> None:
         self.addWidget(button(label, css_name = "keybord", callback = LogicCalculate.inputing_line_edit, window = self.window), row, column, 1, 1)
 
-
-class GridBasicCalc(QGridLayout):
+class GridBaseCalc(QGridLayout):
     def __init__(self, window):
         super().__init__()
         self.setSpacing(0)
         self.setContentsMargins(0, 0, 0, 0)
         local_histori = HistoriScroll()
         window.local_histori = local_histori
-        self.addWidget(local_histori)
+        self.addWidget(local_histori, 0, 0, 1, 6)
+
+class GridBasicCalc(GridBaseCalc):
+    def __init__(self, window):
+        super().__init__(window)
         line_edit = LineEdit(window, (0, 0))
         window.line_edit = 0, line_edit
         self.addWidget(line_edit)
 
 
-class GridIntegralCalc(QGridLayout):
+class GridIntegralCalc(GridBaseCalc):
     def __init__(self, window):
-        print(window)
-        super().__init__()
-        self.setSpacing(0)
-        self.setContentsMargins(0, 0, 0, 0)
-        local_histori = HistoriScroll()
-        window.local_histori = local_histori
-        self.addWidget(local_histori, 0, 0, 1, 6)
+        super().__init__(window)
 
-        self.addWidget(ButtonBase("a = ", css_name = "calculate", max_width = 45, window = window), 1, 0, 1, 1)
-        a_line_edit = LineEdit(window, (1, 1))
+        self.addWidget(ButtonBase("a = ", css_name = "calculate", width = 64, window = window), 1, 0, 1, 1)
+        a_line_edit = LineEdit(window, (1, 0), text = "1")
         window.line_edit = 1, a_line_edit
         self.addWidget(a_line_edit, 1, 1, 1, 2)
-        self.addWidget(ButtonBase("b = ", css_name = "calculate", max_width = 45, window = window), 1, 3, 1, 1)
-        b_line_edit = LineEdit(window, (1, 2))
+        self.addWidget(ButtonBase("b = ", css_name = "calculate", width = 64, window = window), 1, 3, 1, 1)
+        b_line_edit = LineEdit(window, (1, 1), text = "2")
         window.line_edit = 1, b_line_edit
         self.addWidget(b_line_edit, 1, 4, 1, 2)
-        main_line_edit = LineEdit(window, (1, 3))
+        main_line_edit = LineEdit(window, (1, 2))
         window.line_edit = 1, main_line_edit
         self.addWidget(main_line_edit, 2, 0, 1, 6)
 
-class GridDerivativeCalc(QGridLayout):
+class GridDerivativeOrIntegrateCalc(GridBaseCalc):
+    def __init__(self: Self, window, number_tab: int):
+        super().__init__(window)
+        line_edit = LineEdit(window, (number_tab, 0))
+        window.line_edit = number_tab, line_edit
+        self.addWidget(line_edit)
+class GridReplacementCalc(GridBaseCalc):
     def __init__(self: Self, window):
-        super().__init__()
-        self.setSpacing(0)
-        self.setContentsMargins(0, 0, 0, 0)
-        local_histori = HistoriScroll()
-        window.local_histori = local_histori
-        self.addWidget(local_histori, 0, 0, 1, 6)
-        ordinar_derivate_line_edit = LineEdit(window, (2, 0))
-        window.line_edit = 2, ordinar_derivate_line_edit
-        self.addWidget(ordinar_derivate_line_edit, 1, 0, 1, 6)
-        ordinar_derivate_line_edit = LineEdit(window, (2, 1))
-        window.line_edit = 2, ordinar_derivate_line_edit
-        self.addWidget(ordinar_derivate_line_edit, 2, 0, 1, 6)
+        super().__init__(window)
+        self.addWidget(ButtonBase("with =", css_name = "calculate", width = 100, window = window), 1, 0, 1, 1)
+        with_line_edit = LineEdit(window, (4, 0), text = "x")
+        window.line_edit = 4, with_line_edit
+        self.addWidget(with_line_edit, 1, 1, 1, 2)
+        self.addWidget(ButtonBase("on =", css_name = "calculate", width = 100, window = window), 1, 3, 1, 1)
+        on_line_edit = LineEdit(window, (4, 1), text = "0")
+        window.line_edit = 4, on_line_edit
+        self.addWidget(on_line_edit, 1, 4, 1, 2)
+        main_line_edit = LineEdit(window, (4, 2))
+        window.line_edit = 4, main_line_edit
+        self.addWidget(main_line_edit, 2, 0, 1, 6)       
+

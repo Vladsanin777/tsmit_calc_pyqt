@@ -6,26 +6,29 @@ from PyQt6.QtCore import Qt, QMimeData, QRectF
 from PyQt6.QtGui import QDrag
 from UI import StyleButton
 class ButtonBase(QPushButton):
-    def __init__(self, label, *, callback=None, menu=None, css_name = "title-menu-button", window, font_size = 20, min_width = 64, max_width = 0, is_addition_callback = True):
+    def __init__(self, label, *, callback=None, menu=None, css_name = "title-menu-button", window, font_size = 20, min_width = 64, width = 0, is_addition_callback = True):
         self.window = window
         super().__init__(label)
+        self.setContentsMargins(0, 0, 0, 0)
         if callback:
             self.clicked.connect(partial(callback, self, window) if is_addition_callback else callback)
         if menu:
             self.setMenu(menu)
         self.setObjectName(css_name)
-        self.setMinimumSize(min_width, 35)
-        if max_width: self.setMaximumWidth(max_width)
+        self.setFixedHeight(35)
+        if width:
+            self.setFixedWidth(width)
+        else:
+            self.setMinimumWidth(min_width)
         font = self.font()
         font.setPointSize(font_size)
         self.setFont(font)
-        self.setContentsMargins(0, 0, 0, 0)
     def paintEvent(self, event):
         StyleButton(self, self.window)
 
 class ButtonDrag(ButtonBase):
-    def __init__(self, label: str, *, callback = None, menu = None, css_name = "keybord", window, font_size = 20, min_width = 64, max_width = 0):
-        super().__init__(label, callback = callback, menu = menu, css_name = css_name, window = window, font_size = font_size, min_width = min_width, max_width = max_width)
+    def __init__(self, label: str, *, callback = None, menu = None, css_name = "keybord", window, font_size = 20, min_width = 64, width = 0):
+        super().__init__(label, callback = callback, menu = menu, css_name = css_name, window = window, font_size = font_size, min_width = min_width, width = width)
 
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
@@ -45,8 +48,8 @@ class ButtonDrag(ButtonBase):
 
 
 class ButtonDragAndDrop(ButtonDrag):
-    def __init__(self, label, *, callback = None, menu = None, css_name = "keybord", window, font_size = 20, min_width = 64, max_width = 0):
-        super().__init__(label, callback = callback, menu = menu, css_name = css_name, window = window, font_size = font_size, min_width = min_width, max_width = max_width)
+    def __init__(self, label, *, callback = None, menu = None, css_name = "keybord", window, font_size = 20, min_width = 64, width = 0):
+        super().__init__(label, callback = callback, menu = menu, css_name = css_name, window = window, font_size = font_size, min_width = min_width, width = width)
         self.setAcceptDrops(True)
 
     def dragEnterEvent(self, event):

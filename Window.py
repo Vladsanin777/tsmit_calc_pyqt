@@ -48,15 +48,13 @@ class Window(QWidget):
     __line_edit: list[list[LineEdit]]
     __inputtin: tuple[int, int]
     __result: list[list[str]]
-    __fix_not_re_differentiation: bool
     def __init__(self: Self) -> Self:
-        self.__fix_not_re_differentiation = True
         self.__add_local_histori = list()
         self.__resize_local_histori = list()
         self.__local_histori = list()
-        self.__line_edit = [[], [], []]
+        self.__line_edit = [[], [], [], [], []]
         self.__inputtin = 0, 0
-        self.__result = [["0"], ["0", "0", "0", "0"], ["0", "0"]]
+        self.__result = [["0"], ["1", "2", "0"], ["0"], ["0"], ["x", "0", "0"]]
         super().__init__()
         self.setLayout(MainLayout(self))
         self.setWindowTitle("Calculate")
@@ -161,6 +159,13 @@ class Window(QWidget):
     def getResult(self, tab: int, line_edit: int) -> str:
         if isinstance(tab, int) and isinstance(line_edit, int):
             return self.__result[tab][line_edit]
+    def setResult(self: Self, line_edit_for_result: tuple[int, int], result: str):
+        if isinstance(result, str) and len(line_edit_for_result) == 2 \
+                and isinstance(line_edit_for_result, tuple)\
+                and isinstance(line_edit_for_result[0], int)\
+                and isinstance(line_edit_for_result[1], int):
+            self.__result[line_edit_for_result[0]][line_edit_for_result[1]] = result
+        return
     @property
     def inputtin(self) -> tuple[int, int]:
         return self.__inputtin
@@ -169,12 +174,4 @@ class Window(QWidget):
         print(value, 156)
         if isinstance(value, tuple) and isinstance(value[0], int) and isinstance(value[1], int):
             self.__inputtin = value
-        return
-    @property
-    def fix_not_re_differentiation(self: Self) -> bool:
-        return self.__fix_not_re_differentiation
-    @fix_not_re_differentiation.setter
-    def fix_not_re_differentiation(self: Self, new_value) -> None:
-        if isinstance(new_value, bool):
-            self.__fix_not_re_differentiation = new_value
         return

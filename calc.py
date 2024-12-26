@@ -77,6 +77,9 @@ class Application(QApplication):
                 background: none;
                 height: 0;
             }
+            QTabWidget::tab-bar {
+                alignment: center;
+            }
         """)
         
     def change_fon(self):

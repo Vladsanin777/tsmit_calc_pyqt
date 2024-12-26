@@ -6,8 +6,9 @@ from LogicButton import LogicCalculate
 from UI import StyleButton, StyleLineEdit
 class LineEdit(QLineEdit):
     __inputtin: tuple[int, int]
-    def __init__(self, window, inputtin: tuple[int, int]):
+    def __init__(self, window, inputtin: tuple[int, int], *, text = ""):
         super().__init__()
+        self.setText(text)
         self.window = window
         self.setSizePolicy(self.sizePolicy().Policy.Expanding, self.sizePolicy().Policy.Expanding)
         self.setObjectName("keybord")
@@ -16,6 +17,7 @@ class LineEdit(QLineEdit):
         font.setPointSize(25)
         self.setFont(font)
         self.setMaximumHeight(40)
+        self.setMinimumWidth(40)
         self.setContentsMargins(0, 0, 0, 0)
         self.__inputtin = inputtin
     def focusInEvent(self, event: QFocusEvent):
