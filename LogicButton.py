@@ -16,6 +16,7 @@ class LogicCalculate():
         if (line_edit_text := "".join(self.line_edit_text.split("_ALL"))) != "":
             
             self.line_edit_text = line_edit_text
+            self.window.result = line_edit_text
             self.button_other()
             self.add_histori(self.window, line_edit_text)
 
@@ -27,6 +28,7 @@ class LogicCalculate():
     def button__DO(self):
         if (line_edit_text := "".join(line_edit_text_list := self.line_edit_text.split("_DO"))) != "":
             self.line_edit_text = line_edit_text
+            self.window.result = line_edit_text
             self.button_other()
             self.add_histori(self.window, line_edit_text)
         self.window.line_edit.setText(line_edit_text_list[1])
@@ -34,6 +36,7 @@ class LogicCalculate():
     def button__POS(self):
         if (line_edit_text := "".join(line_edit_text_list := self.line_edit_text.split("_POS"))) != "":
             self.line_edit_text = line_edit_text
+            self.window.result = line_edit_text
             self.button_other()
             self.add_histori(self.window, line_edit_text)
         self.window.line_edit.setText(line_edit_text_list[0])
@@ -43,6 +46,7 @@ class LogicCalculate():
         result = window.result
         if (line_edit_text := "".join(line_edit_text_list := self.line_edit_text.split("_RES"))) != "":
             self.line_edit_text = line_edit_text
+            self.window.result = line_edit_text
             self.button_other()
             self.add_histori(window, line_edit_text)
         line_edit = self.window.line_edit
@@ -101,7 +105,7 @@ class LogicCalculate():
                     Integral(
                         a = window.getResult(1, 0), 
                         b = window.getResult(1, 1), 
-                        equation = window.getLineEdit(1, 2).text()
+                        equation = window.getLineEdit(1, 2).text().replace("_DO", "").replace("_ALL", "").replace("_POS", "").replace("_RES", "").replace("_O", "")
                     )
                 )
             )
